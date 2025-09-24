@@ -33,7 +33,9 @@ public class ObsbotClient
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task TiltUpAsync(int deltaDegrees)
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalUp", deltaDegrees);
+        var address = "/OBSBOT/WebCam/General/SetGimbalUp";
+        await Send(address, deltaDegrees);
+        await Stop(address);
     }
 
     /// <summary>
@@ -53,6 +55,7 @@ public class ObsbotClient
 
     private async Task Stop(string address)
     {
+        await Task.Delay(2000);
         await Send(address, 0);
     }
 
@@ -66,7 +69,9 @@ public class ObsbotClient
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task PanLeftAsync(int deltaDegrees)
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalLeft", deltaDegrees);
+        var address = "/OBSBOT/WebCam/General/SetGimbalLeft";
+        await Send(address, deltaDegrees);
+        await Stop(address);
     }
 
     /// <summary>
@@ -79,7 +84,9 @@ public class ObsbotClient
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task PanRightAsync(int deltaDegrees)
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalRight", deltaDegrees);
+        var address = "/OBSBOT/WebCam/General/SetGimbalRight";
+        await Send(address, deltaDegrees);
+        await Stop(address);
     }
 
     /// <summary>
@@ -92,7 +99,9 @@ public class ObsbotClient
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ZoomInAsync(int delta)
     {
-        await Send("/ptz/zoomIn", delta);
+        var address = "/ptz/zoomIn";
+        await Send(address, delta);
+        await Stop(address);
     }
 
     /// <summary>
@@ -105,7 +114,9 @@ public class ObsbotClient
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ZoomOutAsync(int delta)
     {
-        await Send("/ptz/zoomOut", delta);
+        var address = "/ptz/zoomOut";
+        await Send(address, delta);
+        await Stop(address);
     }
 
     private Task Send(string address, params object[] args)
