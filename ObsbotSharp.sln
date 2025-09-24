@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObsbotSharp", "ObsbotSharp\ObsbotSharp.csproj", "{0EA46F92-B775-4513-8E81-079DDEF881AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObsbotSharp.Tests", "ObsbotSharp.Tests\ObsbotSharp.Tests.csproj", "{E34ECEFB-FBD9-46F2-B604-7DC5CFFB5E5E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EA46F92-B775-4513-8E81-079DDEF881AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EA46F92-B775-4513-8E81-079DDEF881AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EA46F92-B775-4513-8E81-079DDEF881AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EA46F92-B775-4513-8E81-079DDEF881AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E34ECEFB-FBD9-46F2-B604-7DC5CFFB5E5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E34ECEFB-FBD9-46F2-B604-7DC5CFFB5E5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E34ECEFB-FBD9-46F2-B604-7DC5CFFB5E5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E34ECEFB-FBD9-46F2-B604-7DC5CFFB5E5E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
