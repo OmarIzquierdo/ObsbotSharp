@@ -10,11 +10,10 @@
         <PackageId>ObsbotSharp</PackageId>
         <Version>1.0.0</Version>
         <Authors>OmarIzquierdo</Authors>
-        <Company>ObsbotSharp</Company>
-        <Product>ObsbotSharp</Product>
         <Description>.Unofficial NET client for controlling OBSBOT devices via OSC.</Description>
         <PackageTags>obsbot;camera;osc</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryUrl>https://github.com/OmarIzquierdo/ObsbotSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
