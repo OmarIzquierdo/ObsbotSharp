@@ -6,18 +6,6 @@ namespace ObsbotSharp.Tests.Integration;
 public class ObsbotClientShould
 {
     [Fact]
-    public async Task Test1()
-    {
-        ObsbotOptions obsbotOptions = new ObsbotOptions()
-            .WithHost("26.143.174.43")
-            .WithRemotePort(16284)
-            .WithLocalPort(10000);
-        
-        ObsbotClient obsbotClient = new ObsbotClient(obsbotOptions);
-        await obsbotClient.General.SetZoomAsync(0);
-    }
-    
-    [Fact]
     public async Task MoveCameraToRightAsyncQueuesOscMessage()
     {
         var transport = new OscTransportSeam();
