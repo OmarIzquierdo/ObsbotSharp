@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Seams;
+namespace ObsbotSharp.Seams;
 
 public class OscTransportSeam : IOscTransport
 {
