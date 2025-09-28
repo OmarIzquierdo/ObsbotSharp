@@ -1,181 +1,515 @@
-﻿using System.Net;
 using System.Net.Sockets;
 using CoreOSC;
 using CoreOSC.IO;
+using ObsbotSharp.Models;
+using ObsbotSharp.Models.Common;
+using ObsbotSharp.Models.General;
+using ObsbotSharp.Models.MeetSeries;
+using ObsbotSharp.Models.TailSeries;
+using ObsbotSharp.Models.TinySeries;
 
 namespace ObsbotSharp;
 
-/// <summary>
-/// Client for controlling an OBSBOT camera using relative operations.
-/// </summary>
-public class ObsbotClient
+public interface IOscTransport : IDisposable
 {
-    private UdpClient _udpClient;
+    Task SendAsync(string address, object[]? args);
+    Task<OscMessage> ReceiveAsync(int timeoutMs);
+}
 
-    /// <summary>
-    /// Initializes a new instance of the client with the provided connection options.
-    /// </summary>
-    /// <param name="options">
-    /// Connection options containing the target host (IPv4/IPv6 string) and port.
-    /// </param>
-    public ObsbotClient(ObsbotOptions options)
+public sealed class UdpOscTransport : IOscTransport
+{
+    private readonly UdpClient udpClient;
+
+    public UdpOscTransport(ObsbotOptions options)
     {
-        _udpClient = new UdpClient(options.Host, options.Port);
+        if(options is null)
+            throw new ArgumentNullException(nameof(options));
+
+        udpClient = new UdpClient(options.LocalPort);
+        udpClient.Connect(options.Host, options.RemotePort);
     }
 
-    /// <summary>
-    /// Tilts the camera upward by a relative angle.
-    /// </summary>
-    /// <param name="deltaDegrees">
-    /// Positive integer, in degrees, indicating how much to tilt up (relative move). Must be greater than 0.
-    /// The effective upper bound depends on the device; excessive values may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task TiltUpAsync(int deltaDegrees)
+    public async Task SendAsync(string address, object[]? args)
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalUp", deltaDegrees);
+        var message = new OscMessage(new Address(address), args ?? []);
+        await udpClient.SendMessageAsync(message);
     }
 
-    /// <summary>
-    /// Tilts the camera downward by a relative angle.
-    /// </summary>
-    /// <param name="deltaDegrees">
-    /// Positive integer, in degrees, indicating how much to tilt down (relative move). Must be greater than 0.
-    /// The effective upper bound depends on the device; excessive values may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task TiltDownAsync(int deltaDegrees)
+    public async Task<OscMessage> ReceiveAsync(int timeoutMs)
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalDown", deltaDegrees);
+        var receiveTask = udpClient.ReceiveMessageAsync();
+        var completedTask = await Task.WhenAny(receiveTask, Task.Delay(timeoutMs));
+            
+        if (completedTask != receiveTask)
+            throw new TimeoutException($"Timeout OSC ({timeoutMs} ms).");
+
+        return await receiveTask;
+    }
+        
+    public void Dispose() => udpClient.Dispose();
+}
+
+public interface IObsbotClient : IDisposable
+{
+    IGeneralSeries General { get; }
+    ITinySeries Tiny { get; }
+    ITailSeries Tail { get; }
+    IMeetSeries Meet { get; }
+}
+
+public interface IGeneralSeries
+{
+    Task SelectDevice(DeviceNumber deviceNumber);
+    Task SetZoomAsync(int zoomLevel);
+    Task MoveCamaraToLeftAsync(int speed);
+    Task MoveCamaraToRightAsync(int speed);
+    Task MoveCamaraToUpAsync(int speed);
+    Task MoveCamaraToDownAsync(int speed);
+    Task SetMirrorAsync(MirrorState mirrorState);
+    Task StartRecordingPcAsync();
+    Task StopRecordingPcAsync();
+    Task TakeScreenshotAsync();
+    Task SetAutoExposureAsync(AutoExposureType autoExposureType);
+    Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation);
+    Task SetShutterSpeedAsync(ShutterPreset shutterPreset);
+    Task SetISOAsync(int isoValue);
+    Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType);
+    Task SetColorTemperatureAsync(int temperature);
+    Task<DeviceInfo> GeDeviceInfoAsync(int deviceIndex = 0);
+    Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0);
+    Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0);
+}
+
+public interface ITinySeries
+{
+    Task SetAutoFocusAsync(AutoFocusType autofocusType);
+    Task SetManualFocusAsync(int manualFocusValue);
+    Task SelectAITargetStateAsync(AITargetState AITargetState);
+    Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset);
+    Task SelectAIModeAsync(AIMode AIMode);
+    Task SelectTrackingModeAsync(TrackingMode trackingMode);
+    Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0);
+    Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0);
+}
+
+public interface ITailSeries
+{
+    Task SelectAIModeAsync(TailAirAiMode tailAirAiMode);
+    Task SelectAIModeAsync(Tail2AiMode tailAirAiMode);
+    Task SelectTrackingSpeed(TailAirTrackingSpeed tailAirTrackingSpeed);
+    Task SelectTrackingSpeed(Tail2TrackingSpeed tailAirTrackingSpeed);
+    Task SetPanTrackingSpeed(PanAxis panAxis);
+    Task SetPanAxisLock(TiltAxis tiltAxis);
+    Task SetTiltAxisLock(int speed);
+    Task StartRecordingAsync();
+    Task StopRecordingAsync();
+    Task TakeScreenshotAsync();
+    Task SetTriggerPreset(TriggerPreset triggerPreset);
+}
+
+public interface IMeetSeries
+{
+    Task SetAutoFocusAsync(AutoFocusType autofocusType);
+    Task SetManualFocusAsync(int manualFocusValue);
+    Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground);
+    Task SetAutoFramingAsync(AutoFramingState autoFramingState);
+    Task SetStandardModeAsync();
+    Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0);
+    Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0);
+}
+
+public class ObsbotClient : IObsbotClient
+{
+    private readonly IOscTransport transport;
+    protected virtual IOscTransport Transport => transport;
+    private static readonly string[] NoiseAddresses =
+    {
+        "/OBSBOT/WebCam/General/ConnectedResp"
+    };
+    public ITinySeries Tiny { get; }
+    public ITailSeries Tail { get; }
+    public IMeetSeries Meet { get; }
+    public IGeneralSeries General { get; }
+    
+    public ObsbotClient(ObsbotOptions options) : this(new UdpOscTransport(options))
+    {
+    }
+    
+    public ObsbotClient(IOscTransport transport)
+    {
+        this.transport = transport ?? throw new ArgumentNullException(nameof(transport));
+
+        Tiny = new TinySeries(this);
+        Tail = new TailSeries(this);
+        Meet = new MeetSeries(this);
+        General = new GeneralSeries(this);
+    }
+    
+    protected virtual Task SendAsync(string address, object[]? args)
+    {
+        return Transport.SendAsync(address, args);
     }
 
-    /// <summary>
-    /// Pans the camera to the left by a relative angle.
-    /// </summary>
-    /// <param name="deltaDegrees">
-    /// Positive integer, in degrees, indicating how much to pan left (relative move). Must be greater than 0.
-    /// The effective upper bound depends on the device; excessive values may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task PanLeftAsync(int deltaDegrees)
+    protected virtual Task<T> SendAndWaitAsync<T>(
+        string requestAddress,
+        object[]? args,
+        int timeoutMs) where T : IOscParsable<T>
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalLeft", deltaDegrees);
+        return SendAndWaitInternalAsync<T>(requestAddress, args, timeoutMs);
+    }
+    
+    private async Task<T> SendAndWaitInternalAsync<T>(
+        string requestAddress,
+        object[]? args,
+        int timeoutMs) where T : IOscParsable<T>
+    {
+        await SendAsync(requestAddress, args);
+        return await WaitForAsync<T>(timeoutMs);
+    }
+    
+    protected virtual async Task<T> WaitForAsync<T>(int timeoutMs) where T : IOscParsable<T>
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (true)
+        {
+            var remaining = (int)Math.Max(1, (deadline - DateTime.UtcNow).TotalMilliseconds);
+            var oscMessage = await transport.ReceiveAsync(remaining);
+
+            if (NoiseAddresses.Any(address =>
+                    oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            if (T.ReplyAddresses.Any(address =>
+                    oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            {
+                return T.Parse(oscMessage);
+            }
+        }
+    }
+    
+    public virtual void Dispose() => transport.Dispose();
+    
+    private abstract class BaseCommands
+    {
+        private readonly ObsbotClient obsbotClient;
+        protected BaseCommands(ObsbotClient obsbotClient)
+        {
+            this.obsbotClient = obsbotClient;
+        }
+        
+        protected Task SendAsync(string address, object[]? args) =>
+            obsbotClient.SendAsync(address, args);
+
+        protected Task<T> SendAndWaitAsync<T>(
+            string requestAddress,
+            object[]? args,
+            int timeoutMs) where T : IOscParsable<T> =>
+            obsbotClient.SendAndWaitAsync<T>(requestAddress, args, timeoutMs);
     }
 
-    /// <summary>
-    /// Pans the camera to the right by a relative angle.
-    /// </summary>
-    /// <param name="deltaDegrees">
-    /// Positive integer, in degrees, indicating how much to pan right (relative move). Must be greater than 0.
-    /// The effective upper bound depends on the device; excessive values may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task PanRightAsync(int deltaDegrees)
+    private sealed class GeneralSeries : BaseCommands, IGeneralSeries
     {
-        await Send("/OBSBOT/WebCam/General/SetGimbalRight", deltaDegrees);
+        public GeneralSeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+        
+        public async Task SelectDevice(DeviceNumber deviceNumber) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SelectDevice",
+                args: [ (int)deviceNumber, ]
+            );
+        
+        public async Task SetZoomAsync(int zoomLevel) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetZoom",
+                args: [ zoomLevel ]
+            );
+        
+        public async Task MoveCamaraToLeftAsync(int speed) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetGimbalLeft",
+                args: [ speed ]
+            );
+        
+        public async Task MoveCamaraToRightAsync(int speed) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetGimbalRight",
+                args: [ speed ]
+            );
+        
+        public async Task MoveCamaraToUpAsync(int speed) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetGimbalUp",
+                args: [ speed ]
+            );
+
+        public async Task MoveCamaraToDownAsync(int speed) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetGimbalDown",
+                args: [ speed ]
+            );
+        
+        public async Task SetMirrorAsync(MirrorState mirrorState) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetMirror",
+                args: [ (int)mirrorState ]
+            );
+        
+        public async Task StartRecordingPcAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetPCRecording",
+                args: [ 1 ]
+            );
+
+        public async Task StopRecordingPcAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetPCRecording",
+                args: [ 0 ]
+            );
+        
+        public async Task TakeScreenshotAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/PCSnapshot",
+                args: [ 1 ]
+            );
+        
+        public async Task SetAutoExposureAsync(AutoExposureType autoExposureType) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetAutoExposure",
+                args: [ (int)autoExposureType ]
+            );
+        
+        public async Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetExposureCompensate",
+                args: [ (int)exposureCompensation ]
+            );
+              
+        public async Task SetShutterSpeedAsync(ShutterPreset shutterPreset) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetShutterSpeed",
+                args: [ shutterPreset.ToDenominator() ]
+            );
+        
+        public async Task SetISOAsync(int isoValue) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetISO",
+                args: [ isoValue ]
+            );
+        
+        public async Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetAutoWhiteBalance",
+                args: [ (int)whiteBalanceType ]
+            );
+        
+        public async Task SetColorTemperatureAsync(int temperature) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetColorTemperature",
+                args: [ 0, temperature ]
+            );
+        
+        public Task<DeviceInfo> GeDeviceInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<DeviceInfo>(
+                requestAddress: "/OBSBOT/WebCam/General/GetDeviceInfo", 
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );       
+        
+        public Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<ZoomInfo>(
+                requestAddress: "/OBSBOT/WebCam/General/GetZoomInfo", 
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
+        
+        public Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<GimbalPosInfo>(
+                requestAddress: "/OBSBOT/WebCam/General/GetGimbalPosInfo",
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
+    }
+    
+    private sealed class TinySeries : BaseCommands, ITinySeries
+    {
+        public TinySeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+        
+        public async Task SetAutoFocusAsync(AutoFocusType autofocusType) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetAutoFocus",
+                args: [ (int)autofocusType ]
+            );
+        
+        public async Task SetManualFocusAsync(int manualFocusValue) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetManualFocus",
+                args: [ manualFocusValue ]
+            );
+        
+        public async Task SelectAITargetStateAsync(AITargetState AITargetState) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Tiny/ToggleAILock",
+                args: [ (int)AITargetState ]
+            );
+        
+        public async Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Tiny/TriggerPreset",
+                args: [ (int)triggerPreset ]
+            );
+        
+        public async Task SelectAIModeAsync(AIMode AIMode) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Tiny/SetAiMode",
+                args: [ (int)AIMode ]
+            );
+        
+        public async Task SelectTrackingModeAsync(TrackingMode trackingMode) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Tiny/SetTrackingMode",
+                args: [ (int)trackingMode ]
+            );
+        
+        public Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<AiTrackingInfo>(
+                requestAddress: "/OBSBOT/WebCam/Tiny/GetAiTrackingInfo",
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
+        
+        public Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<PresetPositionInfo>(
+                requestAddress: "/OBSBOT/WebCam/Tiny/GetPresetPositionInfo",
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
     }
 
-    /// <summary>
-    /// Zooms in by a relative amount.
-    /// </summary>
-    /// <param name="delta">
-    /// Positive integer indicating the relative zoom increment. Must be greater than 0.
-    /// The unit and effective range depend on the device; larger values produce a larger effect and may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task ZoomInAsync(int delta)
+    private sealed class TailSeries : BaseCommands, ITailSeries
     {
-        await Send("/ptz/zoomIn", delta);
+        private ObsbotClient obsbotClient;
+        public TailSeries(ObsbotClient obsbotClient) : base(obsbotClient) => this.obsbotClient = obsbotClient;
+        
+        public async Task SelectAIModeAsync(TailAirAiMode tailAirAiMode) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetAiMode",
+                args: [ (int)tailAirAiMode ]
+            );
+
+        public async Task SelectAIModeAsync(Tail2AiMode tailAirAiMode) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetAiMode",
+                args: [ (int)tailAirAiMode ]
+            );
+        
+        public async Task SelectTrackingSpeed(TailAirTrackingSpeed tailAirTrackingSpeed) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetTrackingSpeed",
+                args: [ (int)tailAirTrackingSpeed ]
+            );
+        
+        public async Task SelectTrackingSpeed(Tail2TrackingSpeed tailAirTrackingSpeed) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetTrackingSpeed",
+                args: [ (int)tailAirTrackingSpeed ]
+            ); 
+        
+        public async Task SetPanTrackingSpeed(PanAxis panAxis) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetPanTrackingSpeed",
+                args: [ (int)panAxis ]
+            );
+
+        public async Task SetPanAxisLock(TiltAxis tiltAxis) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetPanAxisLock",
+                args: [ (int)tiltAxis ]
+            );
+        
+        public async Task SetTiltAxisLock(int speed) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetTiltAxisLock",
+                args: [ speed ]
+            );
+        
+        public async Task StartRecordingAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetRecording",
+                args: [ 1 ]
+            );
+        
+        public async Task StopRecordingAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/SetRecording",
+                args: [ 0 ]
+            );
+        
+        public new async Task TakeScreenshotAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/Snapshot",
+                args: [ 1 ]
+            );
+        
+        public async Task SetTriggerPreset(TriggerPreset triggerPreset) =>
+            await SendAsync(
+                address: "/OBSBOT/Camera/Tail/TriggerPreset",
+                args: [ (int)triggerPreset ]
+            );
     }
 
-    /// <summary>
-    /// Zooms out by a relative amount.
-    /// </summary>
-    /// <param name="delta">
-    /// Positive integer indicating the relative zoom decrement. Must be greater than 0.
-    /// The unit and effective range depend on the device; larger values produce a larger effect and may be clamped.
-    /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task ZoomOutAsync(int delta)
+    private sealed class MeetSeries : BaseCommands, IMeetSeries
     {
-        await Send("/ptz/zoomOut", delta);
-    }
-
-    private Task Send(string address, params object[] args)
-    {
-        var message = new OscMessage(new Address(address), args);
-        return _udpClient.SendMessageAsync(message);
+        private ObsbotClient obsbotClient;
+        public MeetSeries(ObsbotClient obsbotClient) : base(obsbotClient) => this.obsbotClient = obsbotClient;
+        
+        public async Task SetAutoFocusAsync(AutoFocusType autofocusType) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetAutoFocus",
+                args: [ (int)autofocusType ]
+            );
+        
+        public async Task SetManualFocusAsync(int manualFocusValue) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/General/SetManualFocus",
+                args: [ manualFocusValue ]
+            );
+        
+        public async Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Meet/SetVirtualBackground",
+                args: [ (int)virtualBackground ]
+            );
+        
+        public async Task SetAutoFramingAsync(AutoFramingState autoFramingState) =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Meet/SetAutoFraming",
+                args: [ (int)autoFramingState ]
+            );
+        
+        public async Task SetStandardModeAsync() =>
+            await SendAsync(
+                address: "/OBSBOT/WebCam/Meet/SetStandardMode",
+                args: []
+            );
+        
+        public Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<VirtualBackgroundInfo>(
+                requestAddress: "/OBSBOT/WebCam/Meet/GetVirtualBackgroundInfo",
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
+        
+        public Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0) =>
+            SendAndWaitAsync<AutoFramingInfo>(
+                requestAddress: "/OBSBOT/WebCam/Meet/GetAutoFramingInfo",
+                args: [ deviceIndex ], 
+                timeoutMs: 2000
+            );
     }
 }
 
-/// <summary>
-/// Connection and configuration options for <see cref="ObsbotClient"/>.
-/// </summary>
-public class ObsbotOptions
-{
-    /// <summary>
-    /// Target host expressed as an IPv4 or IPv6 string. Default is <c>"127.0.0.1"</c>.
-    /// </summary>
-    /// <value>An IP address string (e.g., <c>"192.168.1.10"</c> or <c>"::1"</c>).</value>
-    public string Host { get; private set; } = "127.0.0.1";
-
-    /// <summary>
-    /// Target UDP port number. Valid range is 1..65535. Default is <c>16284</c>.
-    /// </summary>
-    /// <value>An integer port within the range 1..65535.</value>
-    public int Port { get; private set; } = 16284;
-
-    /// <summary>
-    /// Sets the target host.
-    /// </summary>
-    /// <param name="host">
-    /// IPv4 or IPv6 string. Must be non-empty and a valid IP representation (hostnames are not accepted).
-    /// </param>
-    /// <returns>The same <see cref="ObsbotOptions"/> instance to allow method chaining.</returns>
-    /// <exception cref="ArgumentException">
-    /// Thrown if <paramref name="host"/> is null/empty/whitespace or not a valid IPv4/IPv6 string.
-    /// </exception>
-    public ObsbotOptions WithHost(string host)
-    {
-        if (string.IsNullOrWhiteSpace(host))
-            throw new ArgumentException("El host no puede ser nulo o vacío.", nameof(host));
-        if (!IPAddress.TryParse(host, out _))
-            throw new ArgumentException("El host no es una IPv4/IPv6 válida.", nameof(host));
-
-        Host = host;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the target UDP port.
-    /// </summary>
-    /// <param name="port">
-    /// Integer within the range 1..65535.
-    /// </param>
-    /// <returns>The same <see cref="ObsbotOptions"/> instance to allow method chaining.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown if <paramref name="port"/> is outside the 1..65535 range.
-    /// </exception>
-    public ObsbotOptions WithPort(int port)
-    {
-        if (port is < 1 or > 65535)
-            throw new ArgumentOutOfRangeException(nameof(port), "Puerto fuera de rango 1..65535.");
-
-        Port = port;
-        return this;
-    }
-}
-
-
-public class Test
-{
-    public async Task Testt()
-    {
-        var obsbotSharp = new ObsbotClient(
-            new ObsbotOptions()
-                .WithHost("127.0.0.1")
-                .WithPort(16284));
-
-        await obsbotSharp.TiltUpAsync(10);
-    }
-}

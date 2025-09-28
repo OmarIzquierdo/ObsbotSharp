@@ -1,5 +1,5 @@
 ﻿using CoreOSC;
-using ObsbotSharp.Tests.Seams;
+using ObsbotSharp.Seams;
 
 namespace ObsbotSharp.Tests.Integration;
 
