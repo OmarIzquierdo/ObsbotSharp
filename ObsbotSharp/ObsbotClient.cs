@@ -23,7 +23,7 @@ namespace ObsbotSharp
         public ITinySeries Tiny { get; }
         public ITailSeries Tail { get; }
         public IMeetSeries Meet { get; }
-        public IGeneralSeries General { get; }
+        public IBaseSeries Base { get; }
 
         public ObsbotClient(ObsbotOptions options) : this(new UdpOscTransport(options))
         {
@@ -35,7 +35,7 @@ namespace ObsbotSharp
             
             var gateway = (IObsbotCommandGateway)this;
             
-            General = new GeneralSeries(gateway);
+            Base = new BaseSeries(gateway);
             Tiny    = new TinySeries(gateway);
             Tail    = new TailSeries(gateway);
             Meet    = new MeetSeries(gateway);

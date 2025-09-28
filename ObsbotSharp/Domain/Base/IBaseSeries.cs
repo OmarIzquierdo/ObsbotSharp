@@ -2,7 +2,7 @@ using ObsbotSharp.Domain.General.Models;
 
 namespace ObsbotSharp.Domain.General;
 
-public interface IGeneralSeries
+public interface IBaseSeries
 {
     Task SelectDevice(DeviceNumber deviceNumber);
     Task SetZoomAsync(int zoomLevel);

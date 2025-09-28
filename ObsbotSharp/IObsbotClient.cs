@@ -7,7 +7,7 @@ namespace ObsbotSharp;
 
 public interface IObsbotClient : IDisposable
 {
-    IGeneralSeries General { get; }
+    IBaseSeries Base { get; }
     ITinySeries Tiny { get; }
     ITailSeries Tail { get; }
     IMeetSeries Meet { get; }

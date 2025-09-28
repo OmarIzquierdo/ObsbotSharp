@@ -10,9 +10,4 @@
       <PackageReference Include="CoreOSC" Version="1.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Domain\Base\Commands\" />
-      <Folder Include="Domain\Base\Models\" />
-    </ItemGroup>
-
 </Project>

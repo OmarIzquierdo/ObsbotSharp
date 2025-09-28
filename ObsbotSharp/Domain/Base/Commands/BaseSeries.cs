@@ -2,10 +2,10 @@ using ObsbotSharp.Domain.General.Models;
 
 namespace ObsbotSharp.Domain.General.Commands;
 
-internal sealed class GeneralSeries : IGeneralSeries
+internal sealed class BaseSeries : IBaseSeries
 {
     private readonly IObsbotCommandGateway gateway;
-    public GeneralSeries(IObsbotCommandGateway gateway)
+    public BaseSeries(IObsbotCommandGateway gateway)
     {
         this.gateway = gateway;
     }
