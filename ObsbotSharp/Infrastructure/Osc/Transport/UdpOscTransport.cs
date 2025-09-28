@@ -19,7 +19,7 @@ public sealed class UdpOscTransport : IOscTransport
 
     public async Task SendAsync(string address, object[]? args)
     {
-        var message = new OscMessage(new Address(address), args ?? Array.Empty<object>());
+        var message = new OscMessage(new Address(address), args ?? []);
         await udpClient.SendMessageAsync(message);
     }
 
