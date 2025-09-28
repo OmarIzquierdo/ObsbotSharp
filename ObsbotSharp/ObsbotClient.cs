@@ -36,7 +36,7 @@ namespace ObsbotSharp
         /// <inheritdoc />
         public IMeetSeries Meet { get; }
         /// <inheritdoc />
-        public IBaseSeries Base { get; }
+        public IBaseSeries General { get; }
 
         /// <summary>
         /// Creates a new client that uses a UDP transport configured with the provided options.
@@ -55,12 +55,12 @@ namespace ObsbotSharp
         {
             this.transport = transport ?? throw new ArgumentNullException(nameof(transport));
 
-            var gateway = (IObsbotCommandGateway)this;
+            IObsbotCommandGateway gateway = this;
             
-            Base = new BaseSeries(gateway);
-            Tiny    = new TinySeries(gateway);
-            Tail    = new TailSeries(gateway);
-            Meet    = new MeetSeries(gateway);
+            General  = new BaseSeries(gateway);
+            Tiny     = new TinySeries(gateway);
+            Tail     = new TailSeries(gateway);
+            Meet     = new MeetSeries(gateway);
         }
         
         Task IObsbotCommandGateway.SendAsync(string address, object[]? args) => 

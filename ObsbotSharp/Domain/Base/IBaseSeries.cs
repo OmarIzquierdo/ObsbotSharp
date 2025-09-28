@@ -11,8 +11,8 @@ public interface IBaseSeries
     /// <summary>
     /// Selects the target device that subsequent commands act upon.
     /// </summary>
-    /// <param name="deviceNumber">Identifier of the device slot to target (0..3).</param>
-    Task SelectDevice(DeviceNumber deviceNumber);
+    /// <param name="deviceSlot">Identifier of the device slot to target (0..3).</param>
+    Task SelectDevice(DeviceSlot deviceSlot);
 
     /// <summary>
     /// Sets the zoom level for the active device.
@@ -63,7 +63,7 @@ public interface IBaseSeries
     /// <summary>
     /// Captures a snapshot from the current video output.
     /// </summary>
-    Task TakeScreenshotAsync();
+    Task TakeSnapshootAsync();
 
     /// <summary>
     /// Configures exposure mode for the active device.

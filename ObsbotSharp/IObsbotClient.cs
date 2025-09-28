@@ -20,7 +20,7 @@ public interface IObsbotClient : IDisposable
     /// Gets the command gateway that contains all shared webcam controls that are available across
     /// OBSBOT product families.
     /// </summary>
-    IBaseSeries Base { get; }
+    IBaseSeries General { get; }
 
     /// <summary>
     /// Gets the command gateway that targets the Tiny series specific OSC commands, including AI

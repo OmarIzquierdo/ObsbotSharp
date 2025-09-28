@@ -65,7 +65,7 @@ internal sealed class TailSeries : ITailSeries
             args: [ 0 ]
         );
 
-    public Task TakeScreenshotAsync() =>
+    public Task TakeSnapshotAsync() =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/Snapshot",
             args: [ 1 ]

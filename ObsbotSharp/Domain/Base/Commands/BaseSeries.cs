@@ -10,10 +10,10 @@ internal sealed class BaseSeries : IBaseSeries
         this.gateway = gateway;
     }
 
-    public Task SelectDevice(DeviceNumber deviceNumber) =>
+    public Task SelectDevice(DeviceSlot deviceSlot) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SelectDevice",
-            args: [ (int)deviceNumber ] 
+            args: [ (int)deviceSlot ] 
         );
 
     public Task SetZoomAsync(int zoomLevel) => 
@@ -64,7 +64,7 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 0 ]
         );
 
-    public Task TakeScreenshotAsync() =>
+    public Task TakeSnapshootAsync() =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/PCSnapshot",
             args: [ 1 ]

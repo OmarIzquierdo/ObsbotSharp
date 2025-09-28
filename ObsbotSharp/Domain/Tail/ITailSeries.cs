@@ -64,7 +64,7 @@ public interface ITailSeries
     /// <summary>
     /// Captures a snapshot from the active Tail device.
     /// </summary>
-    Task TakeScreenshotAsync();
+    Task TakeSnapshotAsync();
 
     /// <summary>
     /// Recalls one of the Tail preset positions.

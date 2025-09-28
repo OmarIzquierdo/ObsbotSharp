@@ -44,7 +44,7 @@ public record DeviceInfo(
 
         for (int iterator = 0; iterator <= 7; iterator += 2)
         {
-            var currentDeviceConnectionState = (CurrentDeviceConnectionState)message.Arguments.ElementAt(iterator);
+            var currentDeviceConnectionState = (ConnectionState)message.Arguments.ElementAt(iterator);
             var currentDeviceName = message.Arguments.ElementAt(iterator + 1).ToString();
             
             if (string.IsNullOrWhiteSpace(currentDeviceName))
@@ -52,7 +52,7 @@ public record DeviceInfo(
                 currentDeviceName = "Not device assigned";
             }
             
-            devices.Add(new Device(currentDeviceName, currentDeviceConnectionState, (DeviceNumber)(iterator / 2)));
+            devices.Add(new Device(currentDeviceName, currentDeviceConnectionState, (DeviceSlot)(iterator / 2)));
         }
         
         return devices;
@@ -62,15 +62,15 @@ public record DeviceInfo(
 /// <summary>
 /// Represents a device slot returned by the OBSBOT OSC service.
 /// </summary>
-/// <param name="CurrentName">Friendly name of the device or a placeholder when none is assigned.</param>
-/// <param name="CurrentDeviceConnectionState">Connection state.</param>
-/// <param name="DeviceNumber">Logical device index.</param>
-public record Device(string CurrentName, CurrentDeviceConnectionState CurrentDeviceConnectionState, DeviceNumber DeviceNumber);
+/// <param name="Name">Friendly name of the device or a placeholder when none is assigned.</param>
+/// <param name="ConnectionState">Connection state.</param>
+/// <param name="Slot">Logical device index.</param>
+public record Device(string Name, ConnectionState ConnectionState, DeviceSlot Slot);
 
 /// <summary>
 /// Identifies the logical device slots exposed by OBSBOT webcams.
 /// </summary>
-public enum DeviceNumber
+public enum DeviceSlot
 {
     /// <summary>First device slot (<c>0</c> when sent through OSC).</summary>
     Device1,
@@ -85,7 +85,7 @@ public enum DeviceNumber
 /// <summary>
 /// Describes whether a device slot is connected or disconnected.
 /// </summary>
-public enum CurrentDeviceConnectionState
+public enum ConnectionState
 {
     /// <summary>Device is disconnected.</summary>
     Disconnected,
