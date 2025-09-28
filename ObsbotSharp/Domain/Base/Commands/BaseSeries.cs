@@ -13,7 +13,7 @@ internal sealed class BaseSeries : IBaseSeries
     public Task SelectDevice(DeviceNumber deviceNumber) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SelectDevice",
-            args: [ (int)deviceNumber] 
+            args: [ (int)deviceNumber ] 
         );
 
     public Task SetZoomAsync(int zoomLevel) => 
