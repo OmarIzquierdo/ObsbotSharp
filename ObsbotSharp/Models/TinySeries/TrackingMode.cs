@@ -1,4 +1,4 @@
-namespace ObsbotSharp.Tests.Models.TinySeries;
+namespace ObsbotSharp.Models.TinySeries;
 
 public enum TrackingMode
 {

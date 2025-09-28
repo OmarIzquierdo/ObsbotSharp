@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models.General;
+namespace ObsbotSharp.Models.General;
 
 public record DeviceInfo(
     List<Device> Device,

@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models.MeetSeries;
+namespace ObsbotSharp.Models.MeetSeries;
 public record AutoFramingInfo(AutoFramingState AutoFramingState) : IOscParsable<AutoFramingInfo>
 {
     public static string[] ReplyAddresses =>

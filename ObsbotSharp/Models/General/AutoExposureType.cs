@@ -1,4 +1,4 @@
-namespace ObsbotSharp.Tests.Models.General;
+namespace ObsbotSharp.Models.General;
 
 public enum AutoExposureType
 {

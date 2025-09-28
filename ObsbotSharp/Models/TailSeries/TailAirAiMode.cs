@@ -1,4 +1,4 @@
-namespace ObsbotSharp.Tests.Models.TailSeries;
+namespace ObsbotSharp.Models.TailSeries;
 
 public enum TailAirAiMode
 {

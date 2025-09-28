@@ -1,4 +1,4 @@
-namespace ObsbotSharp.Tests.Models.Common;
+namespace ObsbotSharp.Models.Common;
 
 public enum VirtualBackgroundState
 {

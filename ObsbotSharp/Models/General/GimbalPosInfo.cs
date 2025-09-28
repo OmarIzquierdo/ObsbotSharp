@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models.General;
+namespace ObsbotSharp.Models.General;
 
 public record GimbalPosInfo(int Roll, int Pitch, int Yaw) : IOscParsable<GimbalPosInfo>
 {

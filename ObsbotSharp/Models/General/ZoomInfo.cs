@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models.General;
+namespace ObsbotSharp.Models.General;
 
 public record ZoomInfo(int ZoomPercent, int FovPreset) : IOscParsable<ZoomInfo>
 {

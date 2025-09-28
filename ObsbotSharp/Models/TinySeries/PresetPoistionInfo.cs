@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models.TinySeries;
+namespace ObsbotSharp.Models.TinySeries;
 
 public record PresetPositionInfo(AiTrackingState AiTrackingState) : IOscParsable<PresetPositionInfo>
 {

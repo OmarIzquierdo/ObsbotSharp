@@ -1,6 +1,6 @@
 using CoreOSC;
 
-namespace ObsbotSharp.Tests.Models;
+namespace ObsbotSharp.Models;
 
 public interface IOscParsable<TSelf> where TSelf : IOscParsable<TSelf>
 {

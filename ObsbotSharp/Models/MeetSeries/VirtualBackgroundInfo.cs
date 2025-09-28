@@ -1,7 +1,7 @@
 using CoreOSC;
-using ObsbotSharp.Tests.Models.Common;
+using ObsbotSharp.Models.Common;
 
-namespace ObsbotSharp.Tests.Models.MeetSeries;
+namespace ObsbotSharp.Models.MeetSeries;
 
 public record VirtualBackgroundInfo(VirtualBackgroundState VirtualBackgroundState) : IOscParsable<VirtualBackgroundInfo>
 {
