@@ -1,4 +1,3 @@
-using ObsbotSharp.Domain.Base.Models;
 using ObsbotSharp.Domain.Common.Models;
 using ObsbotSharp.Domain.Meet.Models;
 

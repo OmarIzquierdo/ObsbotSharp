@@ -1,4 +1,4 @@
-using ObsbotSharp.Domain.Base.Models;
+using ObsbotSharp.Domain.Common.Models;
 using ObsbotSharp.Domain.Tiny.Models;
 
 namespace ObsbotSharp.Domain.Tiny;
