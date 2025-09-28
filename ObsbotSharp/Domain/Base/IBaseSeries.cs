@@ -1,6 +1,6 @@
-using ObsbotSharp.Domain.General.Models;
+using ObsbotSharp.Domain.Base.Models;
 
-namespace ObsbotSharp.Domain.General;
+namespace ObsbotSharp.Domain.Base;
 
 public interface IBaseSeries
 {

@@ -1,4 +1,4 @@
-namespace ObsbotSharp.Domain.General.Models;
+namespace ObsbotSharp.Domain.Base.Models;
 
 public enum AutoExposureType
 {

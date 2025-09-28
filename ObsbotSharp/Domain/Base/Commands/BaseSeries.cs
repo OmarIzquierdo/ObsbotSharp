@@ -1,6 +1,6 @@
-using ObsbotSharp.Domain.General.Models;
+using ObsbotSharp.Domain.Base.Models;
 
-namespace ObsbotSharp.Domain.General.Commands;
+namespace ObsbotSharp.Domain.Base.Commands;
 
 internal sealed class BaseSeries : IBaseSeries
 {

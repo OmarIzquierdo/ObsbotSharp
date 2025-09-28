@@ -1,5 +1,5 @@
-using ObsbotSharp.Domain.General;
-using ObsbotSharp.Domain.General.Commands;
+using ObsbotSharp.Domain.Base;
+using ObsbotSharp.Domain.Base.Commands;
 using ObsbotSharp.Domain.Meet;
 using ObsbotSharp.Domain.Meet.Commands;
 using ObsbotSharp.Domain.Tail;

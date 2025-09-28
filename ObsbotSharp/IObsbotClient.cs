@@ -1,4 +1,4 @@
-using ObsbotSharp.Domain.General;
+using ObsbotSharp.Domain.Base;
 using ObsbotSharp.Domain.Meet;
 using ObsbotSharp.Domain.Tail;
 using ObsbotSharp.Domain.Tiny;

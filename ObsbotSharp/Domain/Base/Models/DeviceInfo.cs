@@ -1,7 +1,7 @@
 using CoreOSC;
 using ObsbotSharp.Infrastructure.Osc.Parsers;
 
-namespace ObsbotSharp.Domain.General.Models;
+namespace ObsbotSharp.Domain.Base.Models;
 
 public record DeviceInfo(
     List<Device> Device,
