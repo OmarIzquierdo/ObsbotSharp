@@ -1,5 +1,9 @@
 namespace ObsbotSharp.Domain.Base.Models;
 
+/// <summary>
+/// Represents the supported exposure compensation steps accepted by the exposure compensation
+/// command.
+/// </summary>
 public enum ExposureCompensation
 {
     EVm3_0 = -30, EVm2_7 = -27, EVm2_3 = -23, EVm2_0 = -20,
