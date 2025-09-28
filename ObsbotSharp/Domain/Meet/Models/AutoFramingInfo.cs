@@ -23,7 +23,7 @@ public record AutoFramingInfo(AutoFramingState AutoFramingState) : IOscParsable<
     public static AutoFramingInfo Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
-            throw new FormatException("AutoFramingInfo espera 1 arg.");
+            throw new FormatException($"AutoFramingInfo expected 1 argument, but received {message.Arguments.Count()}.");
 
         return new AutoFramingInfo(
             AutoFramingState: (AutoFramingState)message.Arguments.ElementAt(0)

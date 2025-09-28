@@ -26,7 +26,7 @@ public record GimbalPosInfo(int Roll, int Pitch, int Yaw) : IOscParsable<GimbalP
     public static GimbalPosInfo Parse(OscMessage message)
     {
         if (message.Arguments.Count() < 3)
-            throw new FormatException("GimbalPosInfo espera 3 args.");
+            throw new FormatException($"GimbalPosInfo expected 3 arguments, but received {message.Arguments.Count()}.");
 
         return new GimbalPosInfo(
             Roll:  Convert.ToInt32(message.Arguments.ElementAt(0)),

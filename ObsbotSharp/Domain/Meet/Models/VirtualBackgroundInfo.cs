@@ -26,7 +26,7 @@ public record VirtualBackgroundInfo(VirtualBackgroundState VirtualBackgroundStat
     public static VirtualBackgroundInfo Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
-            throw new FormatException("VirtualBackgroundInfo espera 1 arg.");
+            throw new FormatException($"VirtualBackgroundInfo expected 1 argument, but received {message.Arguments.Count()}.");
 
         return new VirtualBackgroundInfo(
             VirtualBackgroundState: (VirtualBackgroundState)message.Arguments.ElementAt(0)

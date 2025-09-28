@@ -25,7 +25,7 @@ public record ZoomInfo(int ZoomPercent, int FovPreset) : IOscParsable<ZoomInfo>
     public static ZoomInfo Parse(OscMessage message)
     {
         if (message.Arguments.Count() < 2)
-            throw new FormatException("ZoomInfo espera 2 args.");
+            throw new FormatException($"ZoomInfo expected 2 arguments, but received {message.Arguments.Count()}.");
 
         return new ZoomInfo(
             ZoomPercent: Convert.ToInt32(message.Arguments.ElementAt(0)),

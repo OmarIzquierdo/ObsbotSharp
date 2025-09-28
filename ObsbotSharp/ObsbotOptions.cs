@@ -39,9 +39,10 @@ public class ObsbotOptions
     public ObsbotOptions WithHost(string host)
     {
         if (string.IsNullOrWhiteSpace(host))
-            throw new ArgumentException("El host no puede ser nulo o vacío.", nameof(host));
+            throw new ArgumentException("Host can't be null or empty.", nameof(host));
+        
         if (!IPAddress.TryParse(host, out _))
-            throw new ArgumentException("El host no es una IPv4/IPv6 válida.", nameof(host));
+            throw new ArgumentException("Host is not a IPv4/IPv6 valid.", nameof(host));
 
         Host = host;
         return this;
@@ -60,7 +61,7 @@ public class ObsbotOptions
     public ObsbotOptions WithRemotePort(int port)
     {
         if (port is < 1 or > 65535)
-            throw new ArgumentOutOfRangeException(nameof(port), "Puerto fuera de rango 1..65535.");
+            throw new ArgumentOutOfRangeException(nameof(port), "Port is out of range (1..65535).");
 
         RemotePort = port;
         return this;
@@ -77,7 +78,7 @@ public class ObsbotOptions
     public ObsbotOptions WithLocalPort(int port)
     {
         if (port is < 1 or > 65535)
-            throw new ArgumentOutOfRangeException(nameof(port), "Puerto fuera de rango 1..65535.");
+            throw new ArgumentOutOfRangeException(nameof(port), "Port is out of range (1..65535).");
 
         LocalPort = port;
         return this;

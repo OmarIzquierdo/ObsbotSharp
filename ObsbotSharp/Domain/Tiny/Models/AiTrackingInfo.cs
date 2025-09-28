@@ -24,7 +24,7 @@ public record AiTrackingInfo(AiTrackingState AiTrackingState) : IOscParsable<AiT
     public static AiTrackingInfo Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
-            throw new FormatException("AiTrackingInfo espera 1 arg.");
+            throw new FormatException($"AiTrackingInfo expected 1 argument, but received {message.Arguments.Count()}.");
 
         return new AiTrackingInfo(
             AiTrackingState: (AiTrackingState)message.Arguments.ElementAt(0)

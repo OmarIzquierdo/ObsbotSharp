@@ -29,7 +29,7 @@ public record DeviceInfo(
     public static DeviceInfo Parse(OscMessage message)
     {
         if (message.Arguments.Count() < 7)
-            throw new FormatException("DeviceInfo espera 7 args.");
+            throw new FormatException($"DeviceInfo expected 7 arguments, but received {message.Arguments.Count()}.");
 
         return new DeviceInfo(
             Device: GetDeviceNameAndConnectionState(message), 

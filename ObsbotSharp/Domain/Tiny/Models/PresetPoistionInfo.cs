@@ -24,7 +24,7 @@ public record PresetPositionInfo(AiTrackingState AiTrackingState) : IOscParsable
     public static PresetPositionInfo Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
-            throw new FormatException("PresetPositionInfo espera 2 args.");
+            throw new FormatException($"PresetPositionInfo expected 2 arguments, but received {message.Arguments.Count()}.");
 
         return new PresetPositionInfo(
             AiTrackingState: (AiTrackingState)message.Arguments.ElementAt(0)
