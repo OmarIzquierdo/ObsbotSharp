@@ -20,6 +20,10 @@ public class ObsbotOptions
     /// <value>An integer port within the range 1..65535.</value>
     public int RemotePort { get; private set; } = 16284;
     
+    /// <summary>
+    /// Local UDP port used to bind the OSC client socket. Default is <c>100000</c> which allows the
+    /// operating system to pick an ephemeral port at runtime.
+    /// </summary>
     public int LocalPort { get; private set; } = 100000;
 
     /// <summary>
@@ -62,6 +66,14 @@ public class ObsbotOptions
         return this;
     }
     
+    /// <summary>
+    /// Sets the local UDP port used to receive OSC responses.
+    /// </summary>
+    /// <param name="port">Integer within the range 1..65535.</param>
+    /// <returns>The same <see cref="ObsbotOptions"/> instance to allow method chaining.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown if <paramref name="port"/> is outside the 1..65535 range.
+    /// </exception>
     public ObsbotOptions WithLocalPort(int port)
     {
         if (port is < 1 or > 65535)

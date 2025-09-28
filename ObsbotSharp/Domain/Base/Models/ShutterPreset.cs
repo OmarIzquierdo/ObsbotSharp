@@ -1,5 +1,8 @@
 namespace ObsbotSharp.Domain.Base.Models;
 
+/// <summary>
+/// Lists the shutter speed presets supported by the general shutter speed command.
+/// </summary>
 public enum ShutterPreset
 {
     D6400, D5000, D3200, D2500, D2000, D1600, D1250, D1000,
@@ -8,8 +11,17 @@ public enum ShutterPreset
     D12_5, D10, D8, D6_25, D5, D4, D3, D2_5
 }
 
+/// <summary>
+/// Helper methods that convert <see cref="ShutterPreset"/> values to their numeric representation.
+/// </summary>
 public static class ShutterPresetExtensions
 {
+    /// <summary>
+    /// Converts a <see cref="ShutterPreset"/> into the denominator used by the OSC command.
+    /// </summary>
+    /// <param name="preset">Preset to convert.</param>
+    /// <returns>Denominator value to be sent to the shutter speed command.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the preset is not recognized.</exception>
     public static double ToDenominator(this ShutterPreset preset) => preset switch
     {
         ShutterPreset.D6400 => 6400, ShutterPreset.D5000 => 5000, ShutterPreset.D3200 => 3200,
@@ -26,6 +38,11 @@ public static class ShutterPresetExtensions
         ShutterPreset.D2_5  => 2.5,
         _ => throw new ArgumentOutOfRangeException(nameof(preset))
     };
-    
+
+    /// <summary>
+    /// Converts a <see cref="ShutterPreset"/> to its equivalent shutter time in seconds.
+    /// </summary>
+    /// <param name="p">Preset to convert.</param>
+    /// <returns>Shutter speed duration in seconds.</returns>
     public static double ToSeconds(this ShutterPreset p) => 1.0 / p.ToDenominator();
 }
