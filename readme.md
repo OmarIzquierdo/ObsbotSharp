@@ -31,7 +31,7 @@ OBSBOT cameras expose an OSC server that listens on a UDP port (16284 by default
 
 ```csharp
 using ObsbotSharp;
-using ObsbotSharp.Domain.Base.Models;
+using ObsbotSharp.Domain.General.Models;
 
 var options = new ObsbotOptions()
     .WithHost("192.168.1.50")    // Camera IP address
@@ -40,7 +40,7 @@ var options = new ObsbotOptions()
 
 using IObsbotClient client = new ObsbotClient(options);
 
-await client.Base.SelectDevice(DeviceNumber.Device1);
+await client.General.SelectDevice(DeviceNumber.Device1);
 ```
 
 The default `ObsbotClient` talks to the camera over UDP, but you can supply custom transport by implementing `IOscTransport` if you need to tunnel through another medium.
