@@ -7,7 +7,6 @@ namespace ObsbotSharp;
 /// </summary>
 public class ObsbotOptions
 {
-
     /// <summary>
     /// Target host expressed as an IPv4 or IPv6 string. Default is <c>"127.0.0.1"</c>.
     /// </summary>
@@ -15,12 +14,15 @@ public class ObsbotOptions
     public string Host { get; private set; } = "127.0.0.1";
 
     /// <summary>
-    /// Target UDP port number. Valid range is 1..65535. Default is <c>16284</c>.
+    /// Target UDP port number for the OBSBOT device. Valid range is 1..65535. Default is <c>16284</c>.
     /// </summary>
     /// <value>An integer port within the range 1..65535.</value>
     public int RemotePort { get; private set; } = 16284;
-    
-    public int LocalPort { get; private set; } = 100000;
+
+    /// <summary>
+    /// Local UDP port used by the client to listen for replies. Valid range is 1..65535. Default is <c>10000</c>.
+    /// </summary>
+    public int LocalPort { get; private set; } = 10000;
 
     /// <summary>
     /// Sets the target host.
@@ -61,7 +63,15 @@ public class ObsbotOptions
         RemotePort = port;
         return this;
     }
-    
+
+    /// <summary>
+    /// Sets the local UDP port used to receive OSC responses.
+    /// </summary>
+    /// <param name="port">Integer within the range 1..65535.</param>
+    /// <returns>The same <see cref="ObsbotOptions"/> instance to allow method chaining.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown if <paramref name="port"/> is outside the 1..65535 range.
+    /// </exception>
     public ObsbotOptions WithLocalPort(int port)
     {
         if (port is < 1 or > 65535)

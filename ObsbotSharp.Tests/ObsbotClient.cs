@@ -1,6 +1,8 @@
 using System.Net.Sockets;
+using System.Threading;
 using CoreOSC;
 using CoreOSC.IO;
+using ObsbotSharp;
 using ObsbotSharp.Tests.Models;
 using ObsbotSharp.Tests.Models.General;
 using ObsbotSharp.Tests.Models.MeetSeries;
@@ -8,284 +10,309 @@ using ObsbotSharp.Tests.Models.TinySeries;
 
 namespace ObsbotSharp.Tests;
 
-public class ObsbotClient : IDisposable
+public interface IOscTransport : IDisposable
+{
+    Task SendAsync(string address, object[]? args, CancellationToken cancellationToken = default);
+    Task<OscMessage> ReceiveAsync(int timeoutMs, CancellationToken cancellationToken = default);
+}
+
+public sealed class UdpOscTransport : IOscTransport
 {
     private readonly UdpClient udpClient;
-    public TinySeries Tiny { get; }
-    public TailSeries Tail { get; }
-    public MeetSeries Meet { get; }
-    public GeneralSeries General { get; }
 
-    public ObsbotClient(ObsbotOptions options)
+    public UdpOscTransport(ObsbotOptions options)
     {
+        if (options is null)
+            throw new ArgumentNullException(nameof(options));
+
         udpClient = new UdpClient(options.LocalPort);
         udpClient.Connect(options.Host, options.RemotePort);
+    }
 
-        General = new GeneralSeries(this);
-        Tiny    = new TinySeries(this);
-        Tail    = new TailSeries(this);
-        Meet    = new MeetSeries(this);
-    }
-    
-    private static readonly string[] NoiseAddresses =
-    [
-        "/OBSBOT/WebCam/General/ConnectedResp"
-    ];
-    
-    private Task SendAsync(string address, params object[]? args) =>
-        udpClient.SendMessageAsync(new OscMessage(new Address(address), args ?? []));
-    
-    private async Task<T> SendAndWaitAsync<T>(
-        string requestAddress, 
-        object[]? args, 
-        int timeoutMs) where T : IOscParsable<T>
+    public async Task SendAsync(string address, object[]? args, CancellationToken cancellationToken = default)
     {
-        await SendAsync(requestAddress, args ?? []);
-        return await WaitForAsync<T>(timeoutMs);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var message = new OscMessage(new Address(address), args ?? Array.Empty<object>());
+        await udpClient.SendMessageAsync(message);
     }
-    
-    private async Task<T> WaitForAsync<T>(int timeoutMs) where T : IOscParsable<T>
+
+    public async Task<OscMessage> ReceiveAsync(int timeoutMs, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var receiveTask = udpClient.ReceiveMessageAsync();
+        var delayTask = Task.Delay(timeoutMs, cancellationToken);
+
+        var completedTask = await Task.WhenAny(receiveTask, delayTask);
+        if (completedTask != receiveTask)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new TimeoutException($"Timeout OSC ({timeoutMs} ms).");
+        }
+
+        return await receiveTask;
+    }
+
+    public void Dispose() => udpClient.Dispose();
+}
+
+public interface IObsbotClient : IDisposable
+{
+    IGeneralSeriesClient General { get; }
+    ITinySeriesClient Tiny { get; }
+    ITailSeriesClient Tail { get; }
+    IMeetSeriesClient Meet { get; }
+}
+
+public interface IGeneralSeriesClient
+{
+    Task SetZoomAsync(int zoomLevel, CancellationToken cancellationToken = default);
+    Task MoveCameraToLeftAsync(int speed, CancellationToken cancellationToken = default);
+    Task MoveCameraToRightAsync(int speed, CancellationToken cancellationToken = default);
+    Task MoveCameraUpAsync(int speed, CancellationToken cancellationToken = default);
+    Task MoveCameraDownAsync(int speed, CancellationToken cancellationToken = default);
+    Task SetMirrorAsync(MirrorState mirrorState, CancellationToken cancellationToken = default);
+    Task StartRecordingPcAsync(CancellationToken cancellationToken = default);
+    Task StopRecordingPcAsync(CancellationToken cancellationToken = default);
+    Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType, CancellationToken cancellationToken = default);
+    Task SetColorTemperatureAsync(int temperature, CancellationToken cancellationToken = default);
+    Task<DeviceInfo> GetDeviceInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+    Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+    Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+}
+
+public interface ITinySeriesClient
+{
+    Task SelectAiTargetStateAsync(AITargetState targetState, CancellationToken cancellationToken = default);
+    Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset, CancellationToken cancellationToken = default);
+    Task SelectAiModeAsync(AIMode mode, CancellationToken cancellationToken = default);
+    Task SelectTrackingModeAsync(TrackingMode trackingMode, CancellationToken cancellationToken = default);
+    Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+    Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+}
+
+public interface ITailSeriesClient
+{
+    Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground, CancellationToken cancellationToken = default);
+    Task SetAutoFramingAsync(AutoFramingState autoFramingState, CancellationToken cancellationToken = default);
+    Task SetStandardModeAsync(CancellationToken cancellationToken = default);
+}
+
+public interface IMeetSeriesClient
+{
+    Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+    Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default);
+}
+
+public class ObsbotClient : IObsbotClient
+{
+    private readonly IOscTransport transport;
+
+    private static readonly string[] NoiseAddresses =
+    {
+        "/OBSBOT/WebCam/General/ConnectedResp"
+    };
+
+    public ObsbotClient(ObsbotOptions options)
+        : this(new UdpOscTransport(options))
+    {
+    }
+
+    internal ObsbotClient(IOscTransport transport)
+    {
+        this.transport = transport ?? throw new ArgumentNullException(nameof(transport));
+
+        General = CreateGeneralSeries();
+        Tiny = CreateTinySeries();
+        Tail = CreateTailSeries();
+        Meet = CreateMeetSeries();
+    }
+
+    protected virtual IOscTransport Transport => transport;
+
+    public IGeneralSeriesClient General { get; }
+
+    public ITinySeriesClient Tiny { get; }
+
+    public ITailSeriesClient Tail { get; }
+
+    public IMeetSeriesClient Meet { get; }
+
+    protected virtual GeneralSeries CreateGeneralSeries() => new(this);
+
+    protected virtual TinySeries CreateTinySeries() => new(this);
+
+    protected virtual TailSeries CreateTailSeries() => new(this);
+
+    protected virtual MeetSeries CreateMeetSeries() => new(this);
+
+    protected virtual Task SendAsync(string address, object[]? args, CancellationToken cancellationToken = default) =>
+        Transport.SendAsync(address, args, cancellationToken);
+
+    protected virtual Task<T> SendAndWaitAsync<T>(
+        string requestAddress,
+        object[]? args,
+        int timeoutMs,
+        CancellationToken cancellationToken) where T : IOscParsable<T>
+    {
+        return SendAndWaitInternalAsync<T>(requestAddress, args, timeoutMs, cancellationToken);
+    }
+
+    private async Task<T> SendAndWaitInternalAsync<T>(
+        string requestAddress,
+        object[]? args,
+        int timeoutMs,
+        CancellationToken cancellationToken) where T : IOscParsable<T>
+    {
+        await SendAsync(requestAddress, args, cancellationToken);
+        return await WaitForAsync<T>(timeoutMs, cancellationToken);
+    }
+
+    protected virtual async Task<T> WaitForAsync<T>(int timeoutMs, CancellationToken cancellationToken)
+        where T : IOscParsable<T>
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
         while (true)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var remaining = (int)Math.Max(1, (deadline - DateTime.UtcNow).TotalMilliseconds);
-            var oscMessage = await ReceiveWithTimeoutAsync(remaining);
+            var oscMessage = await Transport.ReceiveAsync(remaining, cancellationToken);
 
-            if (NoiseAddresses.Any(address => oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            if (NoiseAddresses.Any(address =>
+                    oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            {
                 continue;
+            }
 
-            if (T.ReplyAddresses.Any(address => oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            if (T.ReplyAddresses.Any(address =>
+                    oscMessage.Address.Value.Equals(address, StringComparison.OrdinalIgnoreCase)))
+            {
                 return T.Parse(oscMessage);
+            }
         }
     }
-    
-    private async Task<OscMessage> ReceiveWithTimeoutAsync(int timeoutMs)
-    {
-        var messageResponse = udpClient.ReceiveMessageAsync();
-        var taskCompleted = await Task.WhenAny(messageResponse, Task.Delay(timeoutMs));
-        
-        if (taskCompleted != messageResponse) 
-            throw new TimeoutException($"Timeout OSC ({timeoutMs} ms).");
-        
-        return await messageResponse;
-    }
-    public void Dispose() => udpClient.Dispose();
-    
-    public class GeneralSeries
-    {
-        private ObsbotClient obsbotClient;
-        public GeneralSeries(ObsbotClient obsbotClient) => this.obsbotClient = obsbotClient;
-        
-        public async Task SetZoomAsync(int zoomLevel) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetZoom",
-                args: [ zoomLevel ]
-            );
-        
-        public async Task MoveCamaraToLeftAsync(int speed) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetGimbalLeft",
-                args: [ speed ]
-            );
-        
-        public async Task MoveCamaraToRightAsync(int speed) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetGimbalRight",
-                args: [ speed ]
-            );
-        
-        public async Task MoveCamaraToUpAsync(int speed) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetGimbalUp",
-                args: [ speed ]
-            );
 
-        public async Task MoveCamaraToDownAsync(int speed) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetGimbalDown",
-                args: [ speed ]
-            );
-        
-        public async Task SetMirrorAsync(MirrorState mirrorState) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetMirror",
-                args: [ (int)mirrorState ]
-            );
-        
-        public async Task StartRecordingPcAsync() =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetPCRecording",
-                args: [ 1 ]
-            );
+    public virtual void Dispose() => Transport.Dispose();
 
-        public async Task StopRecordingPcAsync() =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetPCRecording",
-                args: [ 0 ]
-            );
-        
-        public async Task TakeScreenshotAsync() =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/PCSnapshot",
-                args: [ 1 ]
-            );
-        
-        public async Task SetAutoFocusAsync(AutoFocusType autofocusType) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetAutoFocus",
-                args: [ (int)autofocusType ]
-            );
-        
-        public async Task SetManualFocusAsync(int manualFocusValue) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetManualFocus",
-                args: [ manualFocusValue ]
-            );
-        
-        public async Task SetAutoExposureAsync(AutoExposureType autoExposureType) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetAutoExposure",
-                args: [ (int)autoExposureType ]
-            );
-        
-        public async Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetExposureCompensate",
-                args: [ (int)exposureCompensation ]
-            );
-              
-        public async Task SetShutterSpeedAsync(ShutterPreset shutterPreset) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetShutterSpeed",
-                args: [ shutterPreset.ToDenominator() ]
-            );
-        
-        public async Task SetISOAsync(int isoValue) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetISO",
-                args: [ isoValue ]
-            );
-        
-        public async Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetAutoWhiteBalance",
-                args: [ (int)whiteBalanceType ]
-            );
-        
-        public async Task SetColorTemperatureAsync(int temperature) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/General/SetColorTemperature",
-                args: [ 0, temperature ]
-            );
-        
-        public Task<DeviceInfo> GeDeviceInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<DeviceInfo>(
-                requestAddress: "/OBSBOT/WebCam/General/GetDeviceInfo", 
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );       
-        
-        public Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<ZoomInfo>(
-                requestAddress: "/OBSBOT/WebCam/General/GetZoomInfo", 
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
-        
-        public Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<GimbalPosInfo>(
-                requestAddress: "/OBSBOT/WebCam/General/GetGimbalPosInfo",
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
-    }
-    
-    public class TinySeries
+    private sealed class GeneralSeries : SeriesBase, IGeneralSeriesClient
     {
-        private ObsbotClient obsbotClient;
-        public TinySeries (ObsbotClient obsbotClient) => this.obsbotClient = obsbotClient;
-        
-        public async Task SelectAITargetStateAsync(AITargetState AITargetState) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Tiny/ToggleAILock",
-                args: [ (int)AITargetState ]
-            );
-        
-        public async Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Tiny/TriggerPreset",
-                args: [ (int)triggerPreset ]
-            );
-        
-        public async Task SelectAIModeAsync(AIMode AIMode) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Tiny/SetAiMode",
-                args: [ (int)AIMode ]
-            );
-        
-        public async Task SelectTrackingModeAsync(TrackingMode trackingMode) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Tiny/SetTrackingMode",
-                args: [ (int)trackingMode ]
-            );
-        
-        public Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<AiTrackingInfo>(
-                requestAddress: "/OBSBOT/WebCam/Tiny/GetAiTrackingInfo",
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
-        
-        public Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<PresetPositionInfo>(
-                requestAddress: "/OBSBOT/WebCam/Tiny/GetPresetPositionInfo",
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
+        public GeneralSeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+
+        public virtual Task SetZoomAsync(int zoomLevel, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetZoom", new object[] { zoomLevel }, cancellationToken);
+
+        public virtual Task MoveCameraToLeftAsync(int speed, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetGimbalLeft", new object[] { speed }, cancellationToken);
+
+        public virtual Task MoveCameraToRightAsync(int speed, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetGimbalRight", new object[] { speed }, cancellationToken);
+
+        public virtual Task MoveCameraUpAsync(int speed, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetGimbalUp", new object[] { speed }, cancellationToken);
+
+        public virtual Task MoveCameraDownAsync(int speed, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetGimbalDown", new object[] { speed }, cancellationToken);
+
+        public virtual Task SetMirrorAsync(MirrorState mirrorState, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetMirror", new object[] { (int)mirrorState }, cancellationToken);
+
+        public virtual Task StartRecordingPcAsync(CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetPCRecording", new object[] { 1 }, cancellationToken);
+
+        public virtual Task StopRecordingPcAsync(CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetPCRecording", new object[] { 0 }, cancellationToken);
+
+        public virtual Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetAutoWhiteBalance", new object[] { (int)whiteBalanceType }, cancellationToken);
+
+        public virtual Task SetColorTemperatureAsync(int temperature, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/General/SetColorTemperature", new object[] { 0, temperature }, cancellationToken);
+
+        public virtual Task<DeviceInfo> GetDeviceInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<DeviceInfo>("/OBSBOT/WebCam/General/GetDeviceInfo", new object[] { deviceIndex }, 2000, cancellationToken);
+
+        public virtual Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<ZoomInfo>("/OBSBOT/WebCam/General/GetZoomInfo", new object[] { deviceIndex }, 2000, cancellationToken);
+
+        public virtual Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<GimbalPosInfo>("/OBSBOT/WebCam/General/GetGimbalPosInfo", new object[] { deviceIndex }, 2000, cancellationToken);
     }
 
-    public class TailSeries
+    private sealed class TinySeries : SeriesBase, ITinySeriesClient
     {
-        private ObsbotClient obsbotClient;
-        public TailSeries(ObsbotClient obsbotClient) => this.obsbotClient = obsbotClient;
-        
-        public async Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Meet/SetVirtualBackground",
-                args: [ (int)virtualBackground ]
-            );
-        
-        public async Task SetAutoFramingAsync(AutoFramingState autoFramingState) =>
-            await obsbotClient.SendAsync(
-                address: "/OBSBOT/WebCam/Meet/SetAutoFraming",
-                args: [ (int)autoFramingState ]
-            );
-        
-        public async Task SetStandardModeAsync() =>
-            await obsbotClient.SendAsync(address: "/OBSBOT/WebCam/Meet/SetStandardMode");
+        public TinySeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+
+        public virtual Task SelectAiTargetStateAsync(AITargetState targetState, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Tiny/ToggleAILock", new object[] { (int)targetState }, cancellationToken);
+
+        public virtual Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Tiny/TriggerPreset", new object[] { (int)triggerPreset }, cancellationToken);
+
+        public virtual Task SelectAiModeAsync(AIMode mode, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Tiny/SetAiMode", new object[] { (int)mode }, cancellationToken);
+
+        public virtual Task SelectTrackingModeAsync(TrackingMode trackingMode, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Tiny/SetTrackingMode", new object[] { (int)trackingMode }, cancellationToken);
+
+        public virtual Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<AiTrackingInfo>("/OBSBOT/WebCam/Tiny/GetAiTrackingInfo", new object[] { deviceIndex }, 2000, cancellationToken);
+
+        public virtual Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<PresetPositionInfo>("/OBSBOT/WebCam/Tiny/GetPresetPositionInfo", new object[] { deviceIndex }, 2000, cancellationToken);
     }
 
-    public class MeetSeries
+    private sealed class TailSeries : SeriesBase, ITailSeriesClient
     {
-        private ObsbotClient obsbotClient;
-        public MeetSeries(ObsbotClient obsbotClient) => this.obsbotClient = obsbotClient;
-        
-        public Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<VirtualBackgroundInfo>(
-                requestAddress: "/OBSBOT/WebCam/Meet/GetVirtualBackgroundInfo",
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
-        
-        public Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0) =>
-            obsbotClient.SendAndWaitAsync<AutoFramingInfo>(
-                requestAddress: "/OBSBOT/WebCam/Meet/GetAutoFramingInfo",
-                args: [ deviceIndex ], 
-                timeoutMs: 2000
-            );
+        public TailSeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+
+        public virtual Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Meet/SetVirtualBackground", new object[] { (int)virtualBackground }, cancellationToken);
+
+        public virtual Task SetAutoFramingAsync(AutoFramingState autoFramingState, CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Meet/SetAutoFraming", new object[] { (int)autoFramingState }, cancellationToken);
+
+        public virtual Task SetStandardModeAsync(CancellationToken cancellationToken = default) =>
+            SendAsync("/OBSBOT/WebCam/Meet/SetStandardMode", Array.Empty<object>(), cancellationToken);
+    }
+
+    private sealed class MeetSeries : SeriesBase, IMeetSeriesClient
+    {
+        public MeetSeries(ObsbotClient obsbotClient) : base(obsbotClient)
+        {
+        }
+
+        public virtual Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<VirtualBackgroundInfo>("/OBSBOT/WebCam/Meet/GetVirtualBackgroundInfo", new object[] { deviceIndex }, 2000, cancellationToken);
+
+        public virtual Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0, CancellationToken cancellationToken = default) =>
+            SendAndWaitAsync<AutoFramingInfo>("/OBSBOT/WebCam/Meet/GetAutoFramingInfo", new object[] { deviceIndex }, 2000, cancellationToken);
+    }
+
+    private abstract class SeriesBase
+    {
+        private readonly ObsbotClient obsbotClient;
+
+        protected SeriesBase(ObsbotClient obsbotClient)
+        {
+            this.obsbotClient = obsbotClient;
+        }
+
+        protected Task SendAsync(string address, object[]? args, CancellationToken cancellationToken) =>
+            obsbotClient.SendAsync(address, args, cancellationToken);
+
+        protected Task<T> SendAndWaitAsync<T>(
+            string requestAddress,
+            object[]? args,
+            int timeoutMs,
+            CancellationToken cancellationToken) where T : IOscParsable<T> =>
+            obsbotClient.SendAndWaitAsync<T>(requestAddress, args, timeoutMs, cancellationToken);
     }
 }
-
-
-
