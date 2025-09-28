@@ -46,15 +46,4 @@ public class ObsbotClientShould
         Assert.Equal("/OBSBOT/WebCam/General/SetGimbalDown", invocation.Address);
         Assert.Equal([5], invocation.Arguments);
     }
-
-    [Fact]
-    public async Task xxx()
-    {
-        var options = new ObsbotOptions()
-            .WithHost("26.143.174.43")
-            .WithLocalPort(10000)
-            .WithRemotePort(16284);
-        using var client = new ObsbotClient(options);
-        var x = await client.Base.GetZoomInfoAsync();
-    }
 }
