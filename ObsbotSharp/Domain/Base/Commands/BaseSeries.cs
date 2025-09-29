@@ -46,10 +46,10 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ speed ]
         );
 
-    public Task SetMirrorAsync(MirrorState mirrorState) =>
+    public Task SetMirrorAsync(MirrorMode mirrorMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetMirror",
-            args: [ (int)mirrorState ]
+            args: [ (int)mirrorMode ]
         );
 
     public Task StartRecordingPcAsync() =>
@@ -70,10 +70,10 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 1 ]
         );
 
-    public Task SetAutoExposureAsync(AutoExposureType autoExposureType) =>
+    public Task SetAutoExposureAsync(AutoExposureMode autoExposureMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoExposure",
-            args: [ (int)autoExposureType ]
+            args: [ (int)autoExposureMode ]
         );
 
     public Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation) =>
@@ -82,10 +82,10 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ (int)exposureCompensation ]
         );
 
-    public Task SetShutterSpeedAsync(ShutterPreset shutterPreset) =>
+    public Task SetShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetShutterSpeed",
-            args: [ shutterPreset.ToDenominator() ]
+            args: [ shutterSpeedPreset.ToDenominator() ]
         );
 
     public Task SetISOAsync(int isoValue) =>
@@ -94,10 +94,10 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ isoValue ]
         );
 
-    public Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType) =>
+    public Task SetAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoWhiteBalance",
-            args: [ (int)whiteBalanceType ]
+            args: [ (int)whiteBalanceMode ]
         );
 
     public Task SetColorTemperatureAsync(int temperature) =>
@@ -106,8 +106,8 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 0, temperature ]
         );
 
-    public Task<DeviceInfo> GeDeviceInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<DeviceInfo>(
+    public Task<DeviceResponse> GeDeviceInfoAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<DeviceResponse>(
             requestAddress: "/OBSBOT/WebCam/General/GetDeviceInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
@@ -120,8 +120,8 @@ internal sealed class BaseSeries : IBaseSeries
             timeoutMs: 2000
         );
 
-    public Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<GimbalPosInfo>(
+    public Task<GimbalPosition> GetGimbalPosInfoAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<GimbalPosition>(
             requestAddress: "/OBSBOT/WebCam/General/GetGimbalPosInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000

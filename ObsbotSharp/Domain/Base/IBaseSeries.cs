@@ -47,8 +47,8 @@ public interface IBaseSeries
     /// <summary>
     /// Enables or disables image mirroring.
     /// </summary>
-    /// <param name="mirrorState">Desired mirror state.</param>
-    Task SetMirrorAsync(MirrorState mirrorState);
+    /// <param name="mirrorMode">Desired mirror state.</param>
+    Task SetMirrorAsync(MirrorMode mirrorMode);
 
     /// <summary>
     /// Starts the OBSBOT WebCam PC recording feature.
@@ -68,8 +68,8 @@ public interface IBaseSeries
     /// <summary>
     /// Configures exposure mode for the active device.
     /// </summary>
-    /// <param name="autoExposureType">Exposure mode to use.</param>
-    Task SetAutoExposureAsync(AutoExposureType autoExposureType);
+    /// <param name="autoExposureMode">Exposure mode to use.</param>
+    Task SetAutoExposureAsync(AutoExposureMode autoExposureMode);
 
     /// <summary>
     /// Applies exposure compensation.
@@ -80,8 +80,8 @@ public interface IBaseSeries
     /// <summary>
     /// Sets the shutter speed using the denominators defined by OBSBOT.
     /// </summary>
-    /// <param name="shutterPreset">Preset that maps to the desired denominator.</param>
-    Task SetShutterSpeedAsync(ShutterPreset shutterPreset);
+    /// <param name="shutterSpeedPreset">Preset that maps to the desired denominator.</param>
+    Task SetShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset);
 
     /// <summary>
     /// Sets the ISO value for the current device.
@@ -92,8 +92,8 @@ public interface IBaseSeries
     /// <summary>
     /// Switches between manual and automatic white balance.
     /// </summary>
-    /// <param name="whiteBalanceType">Requested white balance mode.</param>
-    Task SetAutoWhiteBalanceAsync(WhiteBalanceType whiteBalanceType);
+    /// <param name="whiteBalanceMode">Requested white balance mode.</param>
+    Task SetAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode);
 
     /// <summary>
     /// Sets the color temperature (Kelvin) for manual white balance control.
@@ -105,7 +105,7 @@ public interface IBaseSeries
     /// Requests device information and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<DeviceInfo> GeDeviceInfoAsync(int deviceIndex = 0);
+    Task<DeviceResponse> GeDeviceInfoAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Requests zoom information and parses the response payload.
@@ -117,5 +117,5 @@ public interface IBaseSeries
     /// Requests the gimbal position and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<GimbalPosInfo> GetGimbalPosInfoAsync(int deviceIndex = 0);
+    Task<GimbalPosition> GetGimbalPosInfoAsync(int deviceIndex = 0);
 }

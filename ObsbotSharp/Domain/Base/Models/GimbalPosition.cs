@@ -9,7 +9,7 @@ namespace ObsbotSharp.Domain.Base.Models;
 /// <param name="Roll">Roll axis value (not used currently).</param>
 /// <param name="Pitch">Pitch angle (-90° to 90°).</param>
 /// <param name="Yaw">Yaw angle (-140° to 140°).</param>
-public record GimbalPosInfo(int Roll, int Pitch, int Yaw) : IOscParsable<GimbalPosInfo>
+public record GimbalPosition(int Roll, int Pitch, int Yaw) : IOscParsable<GimbalPosition>
 {
     /// <inheritdoc />
     public static string[] ReplyAddresses =>
@@ -18,17 +18,17 @@ public record GimbalPosInfo(int Roll, int Pitch, int Yaw) : IOscParsable<GimbalP
     ];
 
     /// <summary>
-    /// Parses the OSC message payload into a <see cref="GimbalPosInfo"/> instance.
+    /// Parses the OSC message payload into a <see cref="GimbalPosition"/> instance.
     /// </summary>
     /// <param name="message">OSC message that contains the gimbal position.</param>
-    /// <returns>A <see cref="GimbalPosInfo"/> representation.</returns>
+    /// <returns>A <see cref="GimbalPosition"/> representation.</returns>
     /// <exception cref="FormatException">Thrown when the message does not contain the expected arguments.</exception>
-    public static GimbalPosInfo Parse(OscMessage message)
+    public static GimbalPosition Parse(OscMessage message)
     {
         if (message.Arguments.Count() < 3)
             throw new FormatException($"GimbalPosInfo expected 3 arguments, but received {message.Arguments.Count()}.");
 
-        return new GimbalPosInfo(
+        return new GimbalPosition(
             Roll:  Convert.ToInt32(message.Arguments.ElementAt(0)),
             Pitch: Convert.ToInt32(message.Arguments.ElementAt(1)),
             Yaw:   Convert.ToInt32(message.Arguments.ElementAt(2))

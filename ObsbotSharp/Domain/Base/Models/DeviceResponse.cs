@@ -6,13 +6,13 @@ namespace ObsbotSharp.Domain.Base.Models;
 /// <summary>
 /// Represents the parsed payload returned by the general device information response message.
 /// </summary>
-/// <param name="Device">Collection of devices reported by the server.</param>
-/// <param name="CurrentSelectedDevice">Index of the currently selected device.</param>
-/// <param name="CurrentDeviceState">Operational state of the selected device.</param>
-public record DeviceInfo(
-    List<Device> Device,
-    int CurrentSelectedDevice,
-    CurrentDeviceState CurrentDeviceState) : IOscParsable<DeviceInfo>
+/// <param name="Devices">Collection of devices reported by the server.</param>
+/// <param name="SelectedDeviceIndex">Index of the currently selected device.</param>
+/// <param name="DeviceOperationalState">Operational state of the selected device.</param>
+public record DeviceResponse(
+    List<Device> Devices,
+    int SelectedDeviceIndex,
+    DeviceOperationalState DeviceOperationalState) : IOscParsable<DeviceResponse>
 {
     /// <inheritdoc />
     public static string[] ReplyAddresses =>
@@ -24,17 +24,17 @@ public record DeviceInfo(
     /// Parses an OSC message that follows the format described in the OBSBOT OSC specification.
     /// </summary>
     /// <param name="message">OSC message received from the device.</param>
-    /// <returns>A populated <see cref="DeviceInfo"/> instance.</returns>
+    /// <returns>A populated <see cref="DeviceResponse"/> instance.</returns>
     /// <exception cref="FormatException">Thrown when the message does not include the expected number of arguments.</exception>
-    public static DeviceInfo Parse(OscMessage message)
+    public static DeviceResponse Parse(OscMessage message)
     {
         if (message.Arguments.Count() < 7)
-            throw new FormatException($"DeviceInfo expected 7 arguments, but received {message.Arguments.Count()}.");
+            throw new FormatException($"DeviceResponse expected 7 arguments, but received {message.Arguments.Count()}.");
 
-        return new DeviceInfo(
-            Device: GetDeviceNameAndConnectionState(message), 
-            CurrentSelectedDevice: Convert.ToInt32(message.Arguments.ElementAt(8)),
-            CurrentDeviceState:  (CurrentDeviceState)Convert.ToInt32(message.Arguments.ElementAt(9))
+        return new DeviceResponse(
+            Devices: GetDeviceNameAndConnectionState(message), 
+            SelectedDeviceIndex: Convert.ToInt32(message.Arguments.ElementAt(8)),
+            DeviceOperationalState:  (DeviceOperationalState)Convert.ToInt32(message.Arguments.ElementAt(9))
         );
     }
 
@@ -96,7 +96,7 @@ public enum ConnectionState
 /// <summary>
 /// Indicates if the currently selected device is sleeping or running.
 /// </summary>
-public enum CurrentDeviceState
+public enum DeviceOperationalState
 {
     /// <summary>Device is in sleep mode.</summary>
     Sleep,
