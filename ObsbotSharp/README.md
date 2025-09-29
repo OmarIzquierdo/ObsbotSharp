@@ -37,7 +37,7 @@ using ObsbotSharp;
 using ObsbotSharp.Domain.Base.Models;
 
 var options = new ObsbotOptions()
-    .WithHost("192.168.1.50")    // Camera IP address
+    .WithHost("192.168.1.50")     // Camera IP address
     .WithRemotePort(16284)        // OSC port exposed by the camera
     .WithLocalPort(12000);        // UDP port used by your application
 
