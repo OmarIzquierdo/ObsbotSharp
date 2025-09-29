@@ -64,7 +64,7 @@ foreach (var device in deviceInfo.Device)
 
 // Current zoom level
 var zoomStatus = await client.General.GetZoomStatusAsync();
-Console.WriteLine($"Zoom ratio: {zoomInfo.CurrentZoomValue}/{zoomInfo.MaximumZoomValue}");
+Console.WriteLine($"Zoom ratio: {zoomStatus.CurrentZoomValue}/{zoomStatus.MaximumZoomValue}");
 
 // AI tracking info (Tiny series)
 var tracking = await client.Tiny.GetAiTrackingStatusAsync();
