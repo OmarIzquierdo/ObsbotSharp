@@ -66,7 +66,7 @@ internal sealed class BaseSeries(IObsbotCommandGateway gateway) : IBaseSeries
             args: [ 1 ]
         );
 
-    public Task SelectAutoExposureAsync(AutoExposureMode autoExposureMode) =>
+    public Task SelectAutoExposureModeAsync(AutoExposureMode autoExposureMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoExposure",
             args: [ (int)autoExposureMode ]

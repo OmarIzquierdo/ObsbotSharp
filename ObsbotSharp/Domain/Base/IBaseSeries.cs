@@ -69,7 +69,7 @@ public interface IBaseSeries
     /// Configures exposure mode for the active device.
     /// </summary>
     /// <param name="autoExposureMode">Exposure mode to use.</param>
-    Task SelectAutoExposureAsync(AutoExposureMode autoExposureMode);
+    Task SelectAutoExposureModeAsync(AutoExposureMode autoExposureMode);
 
     /// <summary>
     /// Applies exposure compensation.
