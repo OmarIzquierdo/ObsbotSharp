@@ -37,7 +37,7 @@ using ObsbotSharp;
 using ObsbotSharp.Domain.Base.Models;
 
 var options = new ObsbotOptions()
-    .WithHost("192.168.1.50")     // Camera IP address
+    .WithHost("127.0.0.1")        // Machine IP address
     .WithRemotePort(16284)        // OSC port exposed by the camera
     .WithLocalPort(12000);        // UDP port used by your application
 
@@ -111,4 +111,4 @@ wrap calls in your own cancellation/timeout logic if you need a different behavi
 
 ## License
 
-ObsbotSharp is released under the MIT license. You are free to use the library in commercial and non-commercial projects as long as you credit the original authors.
+ObsbotSharp is released under the MIT license. You are free to use the library in non-commercial projects as long as you credit the original authors.
