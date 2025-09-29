@@ -8,17 +8,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: '9.0.x'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
+
+      - name: Diagnostic
+        run: |
+          dotnet --info
+          dotnet --list-sdks
+
       - name: Restore
         run: dotnet restore
+
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build -c Release --no-restore -p:GeneratePackageOnBuild=false
+
       - name: Pack
-        run: dotnet pack -c Release --no-build -o ./nupkgs /p:PackageVersion=${GITHUB_REF_NAME#v}
-      - name: Push to NuGet.org
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet pack -c Release --no-build -o ./nupkgs /p:PackageVersion="$VERSION"
+
+      - name: Push .nupkg to NuGet.org
         run: dotnet nuget push "nupkgs/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Push .snupkg
+        run: |
+          shopt -s nullglob
+          for f in nupkgs/*.snupkg; do
+            dotnet nuget push "$f" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
