@@ -63,7 +63,7 @@ public interface IBaseSeries
     /// <summary>
     /// Captures a snapshot from the current video output.
     /// </summary>
-    Task TakeSnapshootAsync();
+    Task TakeSnapshotAsync();
 
     /// <summary>
     /// Configures exposure mode for the active device.
@@ -87,7 +87,7 @@ public interface IBaseSeries
     /// Sets the ISO value for the current device.
     /// </summary>
     /// <param name="isoValue">ISO value supported by the device (100..6400).</param>
-    Task SetISOAsync(int isoValue);
+    Task SetIsoAsync(int isoValue);
 
     /// <summary>
     /// Switches between manual and automatic white balance.

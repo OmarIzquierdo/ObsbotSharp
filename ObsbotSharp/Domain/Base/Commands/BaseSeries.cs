@@ -2,13 +2,9 @@ using ObsbotSharp.Domain.Base.Models;
 
 namespace ObsbotSharp.Domain.Base.Commands;
 
-internal sealed class BaseSeries : IBaseSeries
+internal sealed class BaseSeries(IObsbotCommandGateway gateway) : IBaseSeries
 {
-    private readonly IObsbotCommandGateway gateway;
-    public BaseSeries(IObsbotCommandGateway gateway)
-    {
-        this.gateway = gateway;
-    }
+    private readonly IObsbotCommandGateway gateway = gateway;
 
     public Task SelectDevice(DeviceSlot deviceSlot) =>
         gateway.SendAsync(
@@ -64,7 +60,7 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 0 ]
         );
 
-    public Task TakeSnapshootAsync() =>
+    public Task TakeSnapshotAsync() =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/PCSnapshot",
             args: [ 1 ]
@@ -88,7 +84,7 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ shutterSpeedPreset.ToDenominator() ]
         );
 
-    public Task SetISOAsync(int isoValue) =>
+    public Task SetIsoAsync(int isoValue) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetISO",
             args: [ isoValue ]

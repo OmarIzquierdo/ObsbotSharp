@@ -12,7 +12,7 @@ internal sealed class MeetSeries : IMeetSeries
         this.gateway = gateway;
     }
 
-    public Task SetAutoFocusAsync(AutoFocusMode autofocusMode) =>
+    public Task SelectAutoFocusModeAsync(AutoFocusMode autofocusMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoFocus",
             args: [ (int)autofocusMode ]
@@ -24,13 +24,13 @@ internal sealed class MeetSeries : IMeetSeries
             args: [ manualFocusValue ]
         );
 
-    public Task SetVirtualBackgroundAsync(VirtualBackgroundMode virtualBackground) =>
+    public Task SelectVirtualBackgroundModeAsync(VirtualBackgroundMode virtualBackground) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Meet/SetVirtualBackground",
             args: [ (int)virtualBackground ]
         );
 
-    public Task SetAutoFramingAsync(AutoFramingMode autoFramingMode) =>
+    public Task SelectAutoFramingModeAsync(AutoFramingMode autoFramingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Meet/SetAutoFraming",
             args: [ (int)autoFramingMode ]
@@ -42,14 +42,14 @@ internal sealed class MeetSeries : IMeetSeries
             args: []
         );
 
-    public Task<VirtualBackgroundStatus> GetVirtualBackgroundInfoAsync(int deviceIndex = 0) =>
+    public Task<VirtualBackgroundStatus> GetVirtualBackgroundStatusAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<VirtualBackgroundStatus>(
             requestAddress: "/OBSBOT/WebCam/Meet/GetVirtualBackgroundInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
         );
 
-    public Task<AutoFramingStatus> GetAutoFramingInfoAsync(int deviceIndex = 0) =>
+    public Task<AutoFramingStatus> GetAutoFramingStatusAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<AutoFramingStatus>(
             requestAddress: "/OBSBOT/WebCam/Meet/GetAutoFramingInfo",
             args: [ deviceIndex ],

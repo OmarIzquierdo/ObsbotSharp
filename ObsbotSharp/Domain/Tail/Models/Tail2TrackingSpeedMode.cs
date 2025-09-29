@@ -3,7 +3,7 @@ namespace ObsbotSharp.Domain.Tail.Models;
 /// <summary>
 /// Specifies the Tail 2/Tail 2s tracking speed presets recognised by the tracking speed command.
 /// </summary>
-public enum Tail2TrackingSpeed
+public enum Tail2TrackingSpeedMode
 {
     /// <summary>Super lazy tracking speed.</summary>
     SuperLazy,

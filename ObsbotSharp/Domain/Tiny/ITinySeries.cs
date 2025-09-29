@@ -13,7 +13,7 @@ public interface ITinySeries
     /// Enables manual or automatic focus modes.
     /// </summary>
     /// <param name="autofocusMode">Focus mode supported by Tiny devices.</param>
-    Task SetAutoFocusAsync(AutoFocusMode autofocusMode);
+    Task SelectAutoFocusAsync(AutoFocusMode autofocusMode);
 
     /// <summary>
     /// Sets the manual focus position (0-100).
@@ -24,20 +24,20 @@ public interface ITinySeries
     /// <summary>
     /// Locks or unlocks AI tracking.
     /// </summary>
-    /// <param name="AITargetState">Desired AI tracking target state.</param>
-    Task SelectAITargetStateAsync(AITargetState AITargetState);
+    /// <param name="aiTargetMode">Desired AI tracking target state.</param>
+    Task SelectAiTargetModeAsync(AiTargetMode aiTargetMode);
 
     /// <summary>
     /// Recalls one of the Tiny preset positions.
     /// </summary>
-    /// <param name="triggerPreset">Preset slot identifier.</param>
-    Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset);
+    /// <param name="triggerPresetMode">Preset slot identifier.</param>
+    Task SelectTriggerPresetPositionModeAsync(TriggerPresetMode triggerPresetMode);
 
     /// <summary>
     /// Switches the Tiny AI mode.
     /// </summary>
-    /// <param name="AIMode">AI tracking profile to activate.</param>
-    Task SelectAIModeAsync(AIMode AIMode);
+    /// <param name="aiMode">AI tracking profile to activate.</param>
+    Task SelectAiModeAsync(AIMode aiMode);
 
     /// <summary>
     /// Sets the Tiny tracking framing mode.
@@ -49,11 +49,11 @@ public interface ITinySeries
     /// Retrieves the AI tracking status.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0);
+    Task<AiTrackingStatus> GetAiTrackingStatusAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Retrieves information about the configured preset positions.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<PresetPositionStatus> GetPresetPositionInfoAsync(int deviceIndex = 0);
+    Task<PresetPositionStatus> GetPresetPositionStatusAsync(int deviceIndex = 0);
 }

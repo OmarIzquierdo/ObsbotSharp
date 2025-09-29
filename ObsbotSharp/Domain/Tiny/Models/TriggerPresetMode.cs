@@ -4,7 +4,7 @@ namespace ObsbotSharp.Domain.Tiny.Models;
 /// Identifies the preset slots used by Tiny and Tail devices when recalling stored camera
 /// positions.
 /// </summary>
-public enum TriggerPreset
+public enum TriggerPresetMode
 {
     /// <summary>Preset position 1.</summary>
     PresetPositionOne,

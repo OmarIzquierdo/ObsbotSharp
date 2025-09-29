@@ -7,7 +7,7 @@ namespace ObsbotSharp.Domain.Tiny.Models;
 /// Represents the AI tracking state returned by the Tiny AI tracking response message.
 /// </summary>
 /// <param name="AiTrackingState">Tracking state reported by the device.</param>
-public record AiTrackingInfo(AiTrackingState AiTrackingState) : IOscParsable<AiTrackingInfo>
+public record AiTrackingStatus(AiTrackingState AiTrackingState) : IOscParsable<AiTrackingStatus>
 {
     /// <inheritdoc />
     public static string[] ReplyAddresses =>
@@ -16,17 +16,17 @@ public record AiTrackingInfo(AiTrackingState AiTrackingState) : IOscParsable<AiT
     ];
 
     /// <summary>
-    /// Parses the OSC message payload into a <see cref="AiTrackingInfo"/> instance.
+    /// Parses the OSC message payload into a <see cref="AiTrackingStatus"/> instance.
     /// </summary>
     /// <param name="message">OSC message containing the AI tracking information.</param>
-    /// <returns>A <see cref="AiTrackingInfo"/> representation.</returns>
+    /// <returns>A <see cref="AiTrackingStatus"/> representation.</returns>
     /// <exception cref="FormatException">Thrown when the message does not contain the expected arguments.</exception>
-    public static AiTrackingInfo Parse(OscMessage message)
+    public static AiTrackingStatus Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
             throw new FormatException($"AiTrackingInfo expected 1 argument, but received {message.Arguments.Count()}.");
 
-        return new AiTrackingInfo(
+        return new AiTrackingStatus(
             AiTrackingState: (AiTrackingState)message.Arguments.ElementAt(0)
         );
     }

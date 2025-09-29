@@ -12,7 +12,7 @@ internal sealed class TinySeries : ITinySeries
         this.gateway = gateway;
     }
 
-    public Task SetAutoFocusAsync(AutoFocusMode autofocusMode) =>
+    public Task SelectAutoFocusAsync(AutoFocusMode autofocusMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoFocus",
             args: [ (int)autofocusMode ]
@@ -24,22 +24,22 @@ internal sealed class TinySeries : ITinySeries
             args: [ manualFocusValue ]
         );
 
-    public Task SelectAITargetStateAsync(AITargetState AITargetState) =>
+    public Task SelectAiTargetModeAsync(AiTargetMode aiTargetMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Tiny/ToggleAILock",
-            args: [ (int)AITargetState ]
+            args: [ (int)aiTargetMode ]
         );
 
-    public Task SelectTriggerPresetPositionAsync(TriggerPreset triggerPreset) =>
+    public Task SelectTriggerPresetPositionModeAsync(TriggerPresetMode triggerPresetMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Tiny/TriggerPreset",
-            args: [ (int)triggerPreset ]
+            args: [ (int)triggerPresetMode ]
         );
 
-    public Task SelectAIModeAsync(AIMode AIMode) =>
+    public Task SelectAiModeAsync(AIMode aiMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Tiny/SetAiMode",
-            args: [ (int)AIMode ]
+            args: [ (int)aiMode ]
         );
 
     public Task SelectTrackingModeAsync(TrackingMode trackingMode) =>
@@ -48,14 +48,14 @@ internal sealed class TinySeries : ITinySeries
             args: [ (int)trackingMode ]
         );
 
-    public Task<AiTrackingInfo> GetAiTrackingInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<AiTrackingInfo>(
+    public Task<AiTrackingStatus> GetAiTrackingStatusAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<AiTrackingStatus>(
             requestAddress: "/OBSBOT/WebCam/Tiny/GetAiTrackingInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
         );
 
-    public Task<PresetPositionStatus> GetPresetPositionInfoAsync(int deviceIndex = 0) =>
+    public Task<PresetPositionStatus> GetPresetPositionStatusAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<PresetPositionStatus>(
             requestAddress: "/OBSBOT/WebCam/Tiny/GetPresetPositionInfo",
             args: [ deviceIndex ],

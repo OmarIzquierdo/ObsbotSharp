@@ -11,43 +11,43 @@ internal sealed class TailSeries : ITailSeries
         this.gateway = gateway;
     }
 
-    public Task SelectAIModeAsync(TailAirAiTrackingMode tailAirAiTrackingMode) =>
+    public Task SelectAiModeAsync(TailAirAiTrackingMode tailAirAiTrackingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetAiMode",
             args: [ (int)tailAirAiTrackingMode ]
         );
 
-    public Task SelectAIModeAsync(Tail2AiTrackingMode tailAirAiTrackingMode) =>
+    public Task SelectAiModeAsync(Tail2AiTrackingMode tailAirAiTrackingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetAiMode",
             args: [ (int)tailAirAiTrackingMode ]
         );
 
-    public Task SelectTrackingSpeed(TailAirTrackingSpeedMode tailAirTrackingSpeedMode) =>
+    public Task SelectTrackingSpeedModeAsync(TailAirTrackingSpeedMode tailAirTrackingSpeedMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetTrackingSpeed",
             args: [ (int)tailAirTrackingSpeedMode ]
         );
 
-    public Task SelectTrackingSpeed(Tail2TrackingSpeed tailAirTrackingSpeed) =>
+    public Task SelectTrackingSpeedModeAsync(Tail2TrackingSpeedMode tailAirTrackingSpeedMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetTrackingSpeed",
-            args: [ (int)tailAirTrackingSpeed ]
+            args: [ (int)tailAirTrackingSpeedMode ]
         );
 
-    public Task SelectPanTrackingSpeedMode(PanAxisMode panAxisMode) =>
+    public Task SelectPanTrackingSpeedModeAsync(PanAxisMode panAxisMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetPanTrackingSpeed",
             args: [ (int)panAxisMode ]
         );
 
-    public Task SelectPanAxisLockMode(TiltAxisMode tiltAxisMode) =>
+    public Task SelectPanAxisLockModeAsync(TiltAxisMode tiltAxisMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetPanAxisLock",
             args: [ (int)tiltAxisMode ]
         );
 
-    public Task SetTiltAxisLock(int speed) =>
+    public Task SetTiltAxisLockAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetTiltAxisLock",
             args: [ speed ]
@@ -71,9 +71,9 @@ internal sealed class TailSeries : ITailSeries
             args: [ 1 ]
         );
 
-    public Task SetTriggerPreset(TriggerPreset triggerPreset) =>
+    public Task SelectTriggerPresetModeAsync(TriggerPresetMode triggerPresetMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/TriggerPreset",
-            args: [ (int)triggerPreset ]
+            args: [ (int)triggerPresetMode ]
         );
 }
