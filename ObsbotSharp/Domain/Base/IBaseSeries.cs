@@ -24,41 +24,41 @@ public interface IBaseSeries
     /// Starts or stops the gimbal pan movement to the left.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraToLeftAsync(int speed);
+    Task MoveCamaraLeftAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal pan movement to the right.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraToRightAsync(int speed);
+    Task MoveCamaraRightAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal tilt movement up.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraToUpAsync(int speed);
+    Task MoveCamaraUpAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal tilt movement down.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraToDownAsync(int speed);
+    Task MoveCamaraDownAsync(int speed);
 
     /// <summary>
     /// Enables or disables image mirroring.
     /// </summary>
     /// <param name="mirrorMode">Desired mirror state.</param>
-    Task SetMirrorAsync(MirrorMode mirrorMode);
+    Task SelectMirrorModeAsync(MirrorMode mirrorMode);
 
     /// <summary>
     /// Starts the OBSBOT WebCam PC recording feature.
     /// </summary>
-    Task StartRecordingPcAsync();
+    Task StartRecordingAsync();
 
     /// <summary>
     /// Stops the OBSBOT WebCam PC recording feature.
     /// </summary>
-    Task StopRecordingPcAsync();
+    Task StopRecordingAsync();
 
     /// <summary>
     /// Captures a snapshot from the current video output.
@@ -69,19 +69,19 @@ public interface IBaseSeries
     /// Configures exposure mode for the active device.
     /// </summary>
     /// <param name="autoExposureMode">Exposure mode to use.</param>
-    Task SetAutoExposureAsync(AutoExposureMode autoExposureMode);
+    Task SelectAutoExposureAsync(AutoExposureMode autoExposureMode);
 
     /// <summary>
     /// Applies exposure compensation.
     /// </summary>
     /// <param name="exposureCompensation">Compensation preset (-30 .. 30).</param>
-    Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation);
+    Task SelectExposureCompensateAsync(ExposureCompensation exposureCompensation);
 
     /// <summary>
     /// Sets the shutter speed using the denominators defined by OBSBOT.
     /// </summary>
     /// <param name="shutterSpeedPreset">Preset that maps to the desired denominator.</param>
-    Task SetShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset);
+    Task SelectShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset);
 
     /// <summary>
     /// Sets the ISO value for the current device.
@@ -93,7 +93,7 @@ public interface IBaseSeries
     /// Switches between manual and automatic white balance.
     /// </summary>
     /// <param name="whiteBalanceMode">Requested white balance mode.</param>
-    Task SetAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode);
+    Task SelectAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode);
 
     /// <summary>
     /// Sets the color temperature (Kelvin) for manual white balance control.
@@ -105,17 +105,17 @@ public interface IBaseSeries
     /// Requests device information and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<DeviceResponse> GeDeviceInfoAsync(int deviceIndex = 0);
+    Task<DeviceResponse> GeDeviceResponseAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Requests zoom information and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0);
+    Task<ZoomStatus> GetZoomStatusAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Requests the gimbal position and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<GimbalPosition> GetGimbalPosInfoAsync(int deviceIndex = 0);
+    Task<GimbalPosition> GetGimbalPositionAsync(int deviceIndex = 0);
 }

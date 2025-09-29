@@ -12,8 +12,8 @@ public interface ITinySeries
     /// <summary>
     /// Enables manual or automatic focus modes.
     /// </summary>
-    /// <param name="autofocusType">Focus mode supported by Tiny devices.</param>
-    Task SetAutoFocusAsync(AutoFocusType autofocusType);
+    /// <param name="autofocusMode">Focus mode supported by Tiny devices.</param>
+    Task SetAutoFocusAsync(AutoFocusMode autofocusMode);
 
     /// <summary>
     /// Sets the manual focus position (0-100).
@@ -55,5 +55,5 @@ public interface ITinySeries
     /// Retrieves information about the configured preset positions.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0);
+    Task<PresetPositionStatus> GetPresetPositionInfoAsync(int deviceIndex = 0);
 }

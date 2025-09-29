@@ -3,7 +3,7 @@ namespace ObsbotSharp.Domain.Common.Models;
 /// <summary>
 /// Specifies the virtual background modes exposed by the Meet virtual background command.
 /// </summary>
-public enum VirtualBackgroundState
+public enum VirtualBackgroundMode
 {
     /// <summary>Disable the virtual background.</summary>
     Disable,

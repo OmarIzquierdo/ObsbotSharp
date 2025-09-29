@@ -4,7 +4,7 @@ namespace ObsbotSharp.Domain.Tail.Models;
 /// Enumerates the AI tracking profiles available on Tail 2/Tail 2s devices when invoking the AI
 /// mode command.
 /// </summary>
-public enum Tail2AiMode
+public enum Tail2AiTrackingMode
 {
     /// <summary>Human tracking - single subject.</summary>
     HumanTrackingSingleMode,

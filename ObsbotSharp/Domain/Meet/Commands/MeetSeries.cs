@@ -12,10 +12,10 @@ internal sealed class MeetSeries : IMeetSeries
         this.gateway = gateway;
     }
 
-    public Task SetAutoFocusAsync(AutoFocusType autofocusType) =>
+    public Task SetAutoFocusAsync(AutoFocusMode autofocusMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoFocus",
-            args: [ (int)autofocusType ]
+            args: [ (int)autofocusMode ]
         );
 
     public Task SetManualFocusAsync(int manualFocusValue) =>
@@ -24,16 +24,16 @@ internal sealed class MeetSeries : IMeetSeries
             args: [ manualFocusValue ]
         );
 
-    public Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground) =>
+    public Task SetVirtualBackgroundAsync(VirtualBackgroundMode virtualBackground) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Meet/SetVirtualBackground",
             args: [ (int)virtualBackground ]
         );
 
-    public Task SetAutoFramingAsync(AutoFramingState autoFramingState) =>
+    public Task SetAutoFramingAsync(AutoFramingMode autoFramingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/Meet/SetAutoFraming",
-            args: [ (int)autoFramingState ]
+            args: [ (int)autoFramingMode ]
         );
 
     public Task SetStandardModeAsync() =>
@@ -42,15 +42,15 @@ internal sealed class MeetSeries : IMeetSeries
             args: []
         );
 
-    public Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<VirtualBackgroundInfo>(
+    public Task<VirtualBackgroundStatus> GetVirtualBackgroundInfoAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<VirtualBackgroundStatus>(
             requestAddress: "/OBSBOT/WebCam/Meet/GetVirtualBackgroundInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
         );
 
-    public Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<AutoFramingInfo>(
+    public Task<AutoFramingStatus> GetAutoFramingInfoAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<AutoFramingStatus>(
             requestAddress: "/OBSBOT/WebCam/Meet/GetAutoFramingInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000

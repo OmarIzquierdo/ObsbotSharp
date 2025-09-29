@@ -8,8 +8,8 @@ namespace ObsbotSharp.Domain.Meet.Models;
 /// Represents the virtual background state returned by the Meet virtual background response
 /// message.
 /// </summary>
-/// <param name="VirtualBackgroundState">Virtual background mode reported by the device.</param>
-public record VirtualBackgroundInfo(VirtualBackgroundState VirtualBackgroundState) : IOscParsable<VirtualBackgroundInfo>
+/// <param name="VirtualBackgroundMode">Virtual background mode reported by the device.</param>
+public record VirtualBackgroundStatus(VirtualBackgroundMode VirtualBackgroundMode) : IOscParsable<VirtualBackgroundStatus>
 {
     /// <inheritdoc />
     public static string[] ReplyAddresses =>
@@ -18,18 +18,18 @@ public record VirtualBackgroundInfo(VirtualBackgroundState VirtualBackgroundStat
     ];
 
     /// <summary>
-    /// Parses the OSC message payload into a <see cref="VirtualBackgroundInfo"/> instance.
+    /// Parses the OSC message payload into a <see cref="VirtualBackgroundStatus"/> instance.
     /// </summary>
     /// <param name="message">OSC message containing the virtual background information.</param>
-    /// <returns>A <see cref="VirtualBackgroundInfo"/> representation.</returns>
+    /// <returns>A <see cref="VirtualBackgroundStatus"/> representation.</returns>
     /// <exception cref="FormatException">Thrown when the message does not contain the expected arguments.</exception>
-    public static VirtualBackgroundInfo Parse(OscMessage message)
+    public static VirtualBackgroundStatus Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
             throw new FormatException($"VirtualBackgroundInfo expected 1 argument, but received {message.Arguments.Count()}.");
 
-        return new VirtualBackgroundInfo(
-            VirtualBackgroundState: (VirtualBackgroundState)message.Arguments.ElementAt(0)
+        return new VirtualBackgroundStatus(
+            VirtualBackgroundMode: (VirtualBackgroundMode)message.Arguments.ElementAt(0)
         );
     }
 }

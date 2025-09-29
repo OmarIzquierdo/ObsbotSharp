@@ -12,20 +12,20 @@ public interface ITailSeries
     /// <summary>
     /// Selects the AI mode for Tail Air devices.
     /// </summary>
-    /// <param name="tailAirAiMode">AI profile supported by Tail Air.</param>
-    Task SelectAIModeAsync(TailAirAiMode tailAirAiMode);
+    /// <param name="tailAirAiTrackingMode">AI profile supported by Tail Air.</param>
+    Task SelectAIModeAsync(TailAirAiTrackingMode tailAirAiTrackingMode);
 
     /// <summary>
     /// Selects the AI mode for Tail 2/Tail 2s devices.
     /// </summary>
-    /// <param name="tailAirAiMode">AI profile supported by Tail 2 and Tail 2s.</param>
-    Task SelectAIModeAsync(Tail2AiMode tailAirAiMode);
+    /// <param name="tailAirAiTrackingMode">AI profile supported by Tail 2 and Tail 2s.</param>
+    Task SelectAIModeAsync(Tail2AiTrackingMode tailAirAiTrackingMode);
 
     /// <summary>
     /// Adjusts the tracking speed for Tail Air devices.
     /// </summary>
-    /// <param name="tailAirTrackingSpeed">Tracking speed preset.</param>
-    Task SelectTrackingSpeed(TailAirTrackingSpeed tailAirTrackingSpeed);
+    /// <param name="tailAirTrackingSpeedMode">Tracking speed preset.</param>
+    Task SelectTrackingSpeed(TailAirTrackingSpeedMode tailAirTrackingSpeedMode);
 
     /// <summary>
     /// Adjusts the tracking speed for Tail 2/Tail 2s devices.
@@ -36,14 +36,14 @@ public interface ITailSeries
     /// <summary>
     /// Configures the pan tracking speed.
     /// </summary>
-    /// <param name="panAxis">Axis configuration that includes the desired speed value.</param>
-    Task SetPanTrackingSpeed(PanAxis panAxis);
+    /// <param name="panAxisMode">Axis configuration that includes the desired speed value.</param>
+    Task SelectPanTrackingSpeedMode(PanAxisMode panAxisMode);
 
     /// <summary>
     /// Locks or unlocks the pan axis.
     /// </summary>
-    /// <param name="tiltAxis">Axis lock command.</param>
-    Task SetPanAxisLock(TiltAxis tiltAxis);
+    /// <param name="tiltAxisMode">Axis lock command.</param>
+    Task SelectPanAxisLockMode(TiltAxisMode tiltAxisMode);
 
     /// <summary>
     /// Locks or unlocks the tilt axis.

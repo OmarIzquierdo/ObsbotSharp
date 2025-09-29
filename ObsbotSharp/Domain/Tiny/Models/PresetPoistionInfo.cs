@@ -7,7 +7,7 @@ namespace ObsbotSharp.Domain.Tiny.Models;
 /// Represents the preset information returned by the Tiny preset information response message.
 /// </summary>
 /// <param name="AiTrackingState">Indicates whether the preset is currently locked.</param>
-public record PresetPositionInfo(AiTrackingState AiTrackingState) : IOscParsable<PresetPositionInfo>
+public record PresetPositionStatus(AiTrackingState AiTrackingState) : IOscParsable<PresetPositionStatus>
 {
     /// <inheritdoc />
     public static string[] ReplyAddresses =>
@@ -16,17 +16,17 @@ public record PresetPositionInfo(AiTrackingState AiTrackingState) : IOscParsable
     ];
 
     /// <summary>
-    /// Parses the OSC message payload into a <see cref="PresetPositionInfo"/> instance.
+    /// Parses the OSC message payload into a <see cref="PresetPositionStatus"/> instance.
     /// </summary>
     /// <param name="message">OSC message containing the preset information.</param>
-    /// <returns>A <see cref="PresetPositionInfo"/> representation.</returns>
+    /// <returns>A <see cref="PresetPositionStatus"/> representation.</returns>
     /// <exception cref="FormatException">Thrown when the message does not contain the expected arguments.</exception>
-    public static PresetPositionInfo Parse(OscMessage message)
+    public static PresetPositionStatus Parse(OscMessage message)
     {
         if (!message.Arguments.Any())
             throw new FormatException($"PresetPositionInfo expected 2 arguments, but received {message.Arguments.Count()}.");
 
-        return new PresetPositionInfo(
+        return new PresetPositionStatus(
             AiTrackingState: (AiTrackingState)message.Arguments.ElementAt(0)
         );
     }

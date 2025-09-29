@@ -11,7 +11,7 @@ public class ObsbotClientShould
         var transport = new OscTransportSeam();
         using var client = new ObsbotClient(transport);
 
-        await client.General.MoveCamaraToRightAsync(10);
+        await client.General.MoveCamaraRightAsync(10);
 
         var message = Assert.Single(transport.SentMessages);
         Assert.Equal("/OBSBOT/WebCam/General/SetGimbalRight", message.Address);
@@ -29,7 +29,7 @@ public class ObsbotClientShould
                 new Address("/OBSBOT/WebCam/General/ZoomInfo"),
                 [35, 2]));
 
-        var zoomInfo = await client.General.GetZoomInfoAsync(deviceIndex: 0);
+        var zoomInfo = await client.General.GetZoomStatusAsync(deviceIndex: 0);
 
         Assert.Equal(35, zoomInfo.ZoomPercent);
         Assert.Equal(2, zoomInfo.FovPreset);
@@ -40,7 +40,7 @@ public class ObsbotClientShould
     {
         using var client = new ObsbotClientSeam();
 
-        await client.General.MoveCamaraToDownAsync(5);
+        await client.General.MoveCamaraDownAsync(5);
 
         var invocation = Assert.Single(client.SentMessages);
         Assert.Equal("/OBSBOT/WebCam/General/SetGimbalDown", invocation.Address);

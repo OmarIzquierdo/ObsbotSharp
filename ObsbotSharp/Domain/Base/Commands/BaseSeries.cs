@@ -22,43 +22,43 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ zoomLevel ]
         );
 
-    public Task MoveCamaraToLeftAsync(int speed) =>
+    public Task MoveCamaraLeftAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalLeft",
             args: [ speed ]
         );
 
-    public Task MoveCamaraToRightAsync(int speed) =>
+    public Task MoveCamaraRightAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalRight",
             args: [ speed ]
         );
 
-    public Task MoveCamaraToUpAsync(int speed) =>
+    public Task MoveCamaraUpAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalUp",
             args: [ speed ]
         );
 
-    public Task MoveCamaraToDownAsync(int speed) =>
+    public Task MoveCamaraDownAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalDown",
             args: [ speed ]
         );
 
-    public Task SetMirrorAsync(MirrorMode mirrorMode) =>
+    public Task SelectMirrorModeAsync(MirrorMode mirrorMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetMirror",
             args: [ (int)mirrorMode ]
         );
 
-    public Task StartRecordingPcAsync() =>
+    public Task StartRecordingAsync() =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetPCRecording",
             args: [ 1 ]
         );
 
-    public Task StopRecordingPcAsync() =>
+    public Task StopRecordingAsync() =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetPCRecording",
             args: [ 0 ]
@@ -70,19 +70,19 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 1 ]
         );
 
-    public Task SetAutoExposureAsync(AutoExposureMode autoExposureMode) =>
+    public Task SelectAutoExposureAsync(AutoExposureMode autoExposureMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoExposure",
             args: [ (int)autoExposureMode ]
         );
 
-    public Task SetExposureCompensateAsync(ExposureCompensation exposureCompensation) =>
+    public Task SelectExposureCompensateAsync(ExposureCompensation exposureCompensation) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetExposureCompensate",
             args: [ (int)exposureCompensation ]
         );
 
-    public Task SetShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset) =>
+    public Task SelectShutterSpeedAsync(ShutterSpeedPreset shutterSpeedPreset) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetShutterSpeed",
             args: [ shutterSpeedPreset.ToDenominator() ]
@@ -94,7 +94,7 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ isoValue ]
         );
 
-    public Task SetAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode) =>
+    public Task SelectAutoWhiteBalanceAsync(WhiteBalanceMode whiteBalanceMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoWhiteBalance",
             args: [ (int)whiteBalanceMode ]
@@ -106,21 +106,21 @@ internal sealed class BaseSeries : IBaseSeries
             args: [ 0, temperature ]
         );
 
-    public Task<DeviceResponse> GeDeviceInfoAsync(int deviceIndex = 0) =>
+    public Task<DeviceResponse> GeDeviceResponseAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<DeviceResponse>(
             requestAddress: "/OBSBOT/WebCam/General/GetDeviceInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
         );
 
-    public Task<ZoomInfo> GetZoomInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<ZoomInfo>(
+    public Task<ZoomStatus> GetZoomStatusAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<ZoomStatus>(
             requestAddress: "/OBSBOT/WebCam/General/GetZoomInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000
         );
 
-    public Task<GimbalPosition> GetGimbalPosInfoAsync(int deviceIndex = 0) =>
+    public Task<GimbalPosition> GetGimbalPositionAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<GimbalPosition>(
             requestAddress: "/OBSBOT/WebCam/General/GetGimbalPosInfo",
             args: [ deviceIndex ],

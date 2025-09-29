@@ -4,7 +4,7 @@ namespace ObsbotSharp.Domain.Tail.Models;
 /// Enumerates the AI tracking profiles available on Tail Air devices when invoking the AI mode
 /// command.
 /// </summary>
-public enum TailAirAiMode
+public enum TailAirAiTrackingMode
 {
     /// <summary>No tracking.</summary>
     NoTacking,

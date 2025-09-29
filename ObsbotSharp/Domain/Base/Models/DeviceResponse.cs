@@ -32,19 +32,19 @@ public record DeviceResponse(
             throw new FormatException($"DeviceResponse expected 7 arguments, but received {message.Arguments.Count()}.");
 
         return new DeviceResponse(
-            Devices: GetDeviceNameAndConnectionState(message), 
+            Devices: GetDevices(message), 
             SelectedDeviceIndex: Convert.ToInt32(message.Arguments.ElementAt(8)),
             DeviceOperationalState:  (DeviceOperationalState)Convert.ToInt32(message.Arguments.ElementAt(9))
         );
     }
 
-    private static List<Device> GetDeviceNameAndConnectionState(OscMessage message)
+    private static List<Device> GetDevices(OscMessage message)
     {
         List<Device> devices = new List<Device>();
 
         for (int iterator = 0; iterator <= 7; iterator += 2)
         {
-            var currentDeviceConnectionState = (ConnectionState)message.Arguments.ElementAt(iterator);
+            var currentDeviceConnectionState = (DeviceConnectionStatus)message.Arguments.ElementAt(iterator);
             var currentDeviceName = message.Arguments.ElementAt(iterator + 1).ToString();
             
             if (string.IsNullOrWhiteSpace(currentDeviceName))
@@ -65,7 +65,7 @@ public record DeviceResponse(
 /// <param name="Name">Friendly name of the device or a placeholder when none is assigned.</param>
 /// <param name="ConnectionState">Connection state.</param>
 /// <param name="Slot">Logical device index.</param>
-public record Device(string Name, ConnectionState ConnectionState, DeviceSlot Slot);
+public record Device(string Name, DeviceConnectionStatus DeviceConnectionStatus, DeviceSlot Slot);
 
 /// <summary>
 /// Identifies the logical device slots exposed by OBSBOT webcams.
@@ -85,7 +85,7 @@ public enum DeviceSlot
 /// <summary>
 /// Describes whether a device slot is connected or disconnected.
 /// </summary>
-public enum ConnectionState
+public enum DeviceConnectionStatus
 {
     /// <summary>Device is disconnected.</summary>
     Disconnected,

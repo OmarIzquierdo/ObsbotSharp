@@ -12,10 +12,10 @@ internal sealed class TinySeries : ITinySeries
         this.gateway = gateway;
     }
 
-    public Task SetAutoFocusAsync(AutoFocusType autofocusType) =>
+    public Task SetAutoFocusAsync(AutoFocusMode autofocusMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetAutoFocus",
-            args: [ (int)autofocusType ]
+            args: [ (int)autofocusMode ]
         );
 
     public Task SetManualFocusAsync(int manualFocusValue) =>
@@ -55,8 +55,8 @@ internal sealed class TinySeries : ITinySeries
             timeoutMs: 2000
         );
 
-    public Task<PresetPositionInfo> GetPresetPositionInfoAsync(int deviceIndex = 0) =>
-        gateway.SendAndWaitAsync<PresetPositionInfo>(
+    public Task<PresetPositionStatus> GetPresetPositionInfoAsync(int deviceIndex = 0) =>
+        gateway.SendAndWaitAsync<PresetPositionStatus>(
             requestAddress: "/OBSBOT/WebCam/Tiny/GetPresetPositionInfo",
             args: [ deviceIndex ],
             timeoutMs: 2000

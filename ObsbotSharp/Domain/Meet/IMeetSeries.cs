@@ -12,8 +12,8 @@ public interface IMeetSeries
     /// <summary>
     /// Enables manual or automatic focus modes.
     /// </summary>
-    /// <param name="autofocusType">Focus mode supported by Meet devices.</param>
-    Task SetAutoFocusAsync(AutoFocusType autofocusType);
+    /// <param name="autofocusMode">Focus mode supported by Meet devices.</param>
+    Task SetAutoFocusAsync(AutoFocusMode autofocusMode);
 
     /// <summary>
     /// Sets the manual focus position (0-100).
@@ -25,13 +25,13 @@ public interface IMeetSeries
     /// Configures the virtual background mode.
     /// </summary>
     /// <param name="virtualBackground">Virtual background state (disable, blur, green screen, replacement).</param>
-    Task SetVirtualBackgroundAsync(VirtualBackgroundState virtualBackground);
+    Task SetVirtualBackgroundAsync(VirtualBackgroundMode virtualBackground);
 
     /// <summary>
     /// Configures auto-framing.
     /// </summary>
-    /// <param name="autoFramingState">Auto-framing mode (disable, single, group).</param>
-    Task SetAutoFramingAsync(AutoFramingState autoFramingState);
+    /// <param name="autoFramingMode">Auto-framing mode (disable, single, group).</param>
+    Task SetAutoFramingAsync(AutoFramingMode autoFramingMode);
 
     /// <summary>
     /// Resets the Meet camera to standard mode.
@@ -42,11 +42,11 @@ public interface IMeetSeries
     /// Retrieves the current virtual background state.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<VirtualBackgroundInfo> GetVirtualBackgroundInfoAsync(int deviceIndex = 0);
+    Task<VirtualBackgroundStatus> GetVirtualBackgroundInfoAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Retrieves the current auto-framing state.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<AutoFramingInfo> GetAutoFramingInfoAsync(int deviceIndex = 0);
+    Task<AutoFramingStatus> GetAutoFramingInfoAsync(int deviceIndex = 0);
 }

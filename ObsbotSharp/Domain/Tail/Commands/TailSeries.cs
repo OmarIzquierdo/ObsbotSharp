@@ -11,22 +11,22 @@ internal sealed class TailSeries : ITailSeries
         this.gateway = gateway;
     }
 
-    public Task SelectAIModeAsync(TailAirAiMode tailAirAiMode) =>
+    public Task SelectAIModeAsync(TailAirAiTrackingMode tailAirAiTrackingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetAiMode",
-            args: [ (int)tailAirAiMode ]
+            args: [ (int)tailAirAiTrackingMode ]
         );
 
-    public Task SelectAIModeAsync(Tail2AiMode tailAirAiMode) =>
+    public Task SelectAIModeAsync(Tail2AiTrackingMode tailAirAiTrackingMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetAiMode",
-            args: [ (int)tailAirAiMode ]
+            args: [ (int)tailAirAiTrackingMode ]
         );
 
-    public Task SelectTrackingSpeed(TailAirTrackingSpeed tailAirTrackingSpeed) =>
+    public Task SelectTrackingSpeed(TailAirTrackingSpeedMode tailAirTrackingSpeedMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetTrackingSpeed",
-            args: [ (int)tailAirTrackingSpeed ]
+            args: [ (int)tailAirTrackingSpeedMode ]
         );
 
     public Task SelectTrackingSpeed(Tail2TrackingSpeed tailAirTrackingSpeed) =>
@@ -35,16 +35,16 @@ internal sealed class TailSeries : ITailSeries
             args: [ (int)tailAirTrackingSpeed ]
         );
 
-    public Task SetPanTrackingSpeed(PanAxis panAxis) =>
+    public Task SelectPanTrackingSpeedMode(PanAxisMode panAxisMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetPanTrackingSpeed",
-            args: [ (int)panAxis ]
+            args: [ (int)panAxisMode ]
         );
 
-    public Task SetPanAxisLock(TiltAxis tiltAxis) =>
+    public Task SelectPanAxisLockMode(TiltAxisMode tiltAxisMode) =>
         gateway.SendAsync(
             address: "/OBSBOT/Camera/Tail/SetPanAxisLock",
-            args: [ (int)tiltAxis ]
+            args: [ (int)tiltAxisMode ]
         );
 
     public Task SetTiltAxisLock(int speed) =>

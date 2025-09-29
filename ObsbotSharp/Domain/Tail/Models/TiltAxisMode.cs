@@ -4,7 +4,7 @@ namespace ObsbotSharp.Domain.Tail.Models;
 /// Indicates whether the tilt axis should be locked or unlocked when issuing the tilt axis lock
 /// command.
 /// </summary>
-public enum TiltAxis
+public enum TiltAxisMode
 {
     /// <summary>Unlock the tilt axis.</summary>
     Unlock,
