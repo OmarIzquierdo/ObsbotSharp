@@ -1,8 +1,20 @@
+<div align="center">
+
 # ObsbotSharp
 
-ObsbotSharp is an unofficial .NET library that lets you control OBSBOT cameras through their OSC (Open Sound Control) interface.
-The package wraps the raw OSC messages that the devices expect and exposes strongly-typed helpers for the Tiny, Tail, Meet and
-others webcam series.
+[![NuGet Version](https://img.shields.io/nuget/v/ObsbotSharp?style=flat-square&logo=nuget)](https://www.nuget.org/packages/ObsbotSharp/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/ObsbotSharp?style=flat-square&color=blue)](https://www.nuget.org/packages/ObsbotSharp/)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/OmarIzquierdo/ObsbotSharp/publish.yml?style=flat-square&logo=github&label=build)](https://github.com/OmarIzquierdo/ObsbotSharp/actions)
+[![License](https://img.shields.io/github/license/OmarIzquierdo/ObsbotSharp?style=flat-square&color=yellow)](LICENSE)
+[![Platform](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
+
+**An unofficial .NET library that lets you control OBSBOT cameras through their OSC (Open Sound Control) interface.**
+
+The package wraps the raw OSC messages that the devices expect and exposes strongly-typed helpers for the Tiny, Tail, Meet and others webcam series.
+
+[Report Bug](https://github.com/OmarIzquierdo/ObsbotSharp/issues) · [Request Feature](https://github.com/OmarIzquierdo/ObsbotSharp/issues)
+
+</div>
 
 > **Disclaimer:** ObsbotSharp is a community project and is not affiliated with, endorsed by, or supported by OBSBOT.
 
@@ -23,7 +35,7 @@ Install-Package ObsbotSharp
 ```xml
 <!-- Project file -->
 <ItemGroup>
-  <PackageReference Include="ObsbotSharp" Version="1.0.0" />
+  <PackageReference Include="ObsbotSharp" Version="1.1.0" />
 </ItemGroup>
 ```
 
@@ -37,7 +49,7 @@ using ObsbotSharp;
 using ObsbotSharp.Domain.Base.Models;
 
 var options = new ObsbotOptions()
-    .WithHost("127.0.0.1")        // Machine IP address
+    .WithHost("127.0.0.1")        // IP ObsCenter is using when OSC is running
     .WithRemotePort(16284)        // OSC port exposed by the camera
     .WithLocalPort(12000);        // UDP port used by your application
 
