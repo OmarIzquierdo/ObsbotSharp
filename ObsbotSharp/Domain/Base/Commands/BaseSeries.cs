@@ -18,25 +18,25 @@ internal sealed class BaseSeries(IObsbotCommandGateway gateway) : IBaseSeries
             args: [ zoomLevel ]
         );
 
-    public Task MoveCamaraLeftAsync(int speed) =>
+    public Task MoveCameraLeftAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalLeft",
             args: [ speed ]
         );
 
-    public Task MoveCamaraRightAsync(int speed) =>
+    public Task MoveCameraRightAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalRight",
             args: [ speed ]
         );
 
-    public Task MoveCamaraUpAsync(int speed) =>
+    public Task MoveCameraUpAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalUp",
             args: [ speed ]
         );
 
-    public Task MoveCamaraDownAsync(int speed) =>
+    public Task MoveCameraDownAsync(int speed) =>
         gateway.SendAsync(
             address: "/OBSBOT/WebCam/General/SetGimbalDown",
             args: [ speed ]
@@ -102,7 +102,7 @@ internal sealed class BaseSeries(IObsbotCommandGateway gateway) : IBaseSeries
             args: [ 0, temperature ]
         );
 
-    public Task<DeviceResponse> GeDeviceResponseAsync(int deviceIndex = 0) =>
+    public Task<DeviceResponse> GetDeviceResponseAsync(int deviceIndex = 0) =>
         gateway.SendAndWaitAsync<DeviceResponse>(
             requestAddress: "/OBSBOT/WebCam/General/GetDeviceInfo",
             args: [ deviceIndex ],

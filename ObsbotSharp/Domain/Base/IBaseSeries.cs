@@ -24,25 +24,25 @@ public interface IBaseSeries
     /// Starts or stops the gimbal pan movement to the left.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraLeftAsync(int speed);
+    Task MoveCameraLeftAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal pan movement to the right.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraRightAsync(int speed);
+    Task MoveCameraRightAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal tilt movement up.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraUpAsync(int speed);
+    Task MoveCameraUpAsync(int speed);
 
     /// <summary>
     /// Starts or stops the gimbal tilt movement down.
     /// </summary>
     /// <param name="speed">Value between 0 and 100 where 0 stops the movement.</param>
-    Task MoveCamaraDownAsync(int speed);
+    Task MoveCameraDownAsync(int speed);
 
     /// <summary>
     /// Enables or disables image mirroring.
@@ -105,7 +105,7 @@ public interface IBaseSeries
     /// Requests device information and parses the response payload.
     /// </summary>
     /// <param name="deviceIndex">Optional device index to query.</param>
-    Task<DeviceResponse> GeDeviceResponseAsync(int deviceIndex = 0);
+    Task<DeviceResponse> GetDeviceResponseAsync(int deviceIndex = 0);
 
     /// <summary>
     /// Requests zoom information and parses the response payload.

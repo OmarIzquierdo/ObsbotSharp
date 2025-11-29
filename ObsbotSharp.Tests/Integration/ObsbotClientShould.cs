@@ -11,7 +11,7 @@ public class ObsbotClientShould
         var transport = new OscTransportSeam();
         using var client = new ObsbotClient(transport);
 
-        await client.General.MoveCamaraRightAsync(10);
+        await client.General.MoveCameraRightAsync(10);
 
         var message = Assert.Single(transport.SentMessages);
         Assert.Equal("/OBSBOT/WebCam/General/SetGimbalRight", message.Address);
@@ -40,7 +40,7 @@ public class ObsbotClientShould
     {
         using var client = new ObsbotClientSeam();
 
-        await client.General.MoveCamaraDownAsync(5);
+        await client.General.MoveCameraDownAsync(5);
 
         var invocation = Assert.Single(client.SentMessages);
         Assert.Equal("/OBSBOT/WebCam/General/SetGimbalDown", invocation.Address);

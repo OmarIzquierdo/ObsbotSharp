@@ -55,7 +55,7 @@ You can query the camera for structured data. Each method exposes typed models t
 
 ```csharp
 // Device metadata and connection state
-var deviceInfo = await client.General.GeDeviceResponseAsync();
+var deviceInfo = await client.General.GetDeviceResponseAsync();
 Console.WriteLine($"Selected device: {deviceInfo.CurrentSelectedDevice}");
 foreach (var device in deviceInfo.Device)
 {
@@ -78,7 +78,7 @@ ObsbotSharp contains helpers for each product family. The following snippets hig
 ```csharp
 // General webcam controls
 await client.General.SetZoomAsync(150);                                     // Zoom level (0-1000)
-await client.General.MoveCamaraLeftAsync(10);                               // Pan left at speed 10
+await client.General.MoveCameraLeftAsync(10);                               // Pan left at speed 10
 await client.General.SelectAutoExposureModeAsync(AutoExposureMode.Auto);    // Select ExposureMode
 await client.General.TakeSnapshotAsync();                                   // Trigger a snapshot on the host PC
 
@@ -101,7 +101,7 @@ All commands are asynchronous and return `Task`, so they can be awaited or combi
 
 ## Error handling and timeouts
 
-Calls that expect a reply (for example, `GeDeviceResponseAsync`) wait up to two seconds for the response before timing out. You can
+Calls that expect a reply (for example, `GetDeviceResponseAsync`) wait up to two seconds for the response before timing out. You can
 wrap calls in your own cancellation/timeout logic if you need a different behavior. Commands that do not return data simply fire the OSC message and complete when the payload is sent.
 
 ## Samples and best practices
